@@ -2,7 +2,7 @@ import nuclearEnergyHtml from "./nuclearenergy.html?raw";
 import selfDrivingCarsHtml from "./selfdrivingcars.html?raw";
 import surveillanceHtml from "./surveillance.html?raw";
 
-import "./NewsOnly.css";
+// import "./NewsOnly.css";
 
 const articles = {
   nuclearenergy: nuclearEnergyHtml,
