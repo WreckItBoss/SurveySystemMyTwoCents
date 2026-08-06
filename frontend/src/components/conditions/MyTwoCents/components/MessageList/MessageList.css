@@ -1,0 +1,107 @@
+.message-list {
+  display: grid;
+  gap: 12px;
+}
+
+.message-bubble {
+  box-sizing: border-box;
+  max-width: 78%;
+  padding: 12px;
+  border-radius: 10px;
+  font-size: 13px;
+  color: #090808;
+}
+
+.message-bubble.support {
+  justify-self: start;
+  border: 1px solid rgb(172, 209, 249);
+  background: rgb(172, 209, 249);
+}
+
+.message-bubble.oppose {
+  justify-self: end;
+  border: 1px solid rgb(246, 169, 169);
+  background: rgb(246, 169, 169);
+}
+
+.message-speaker {
+  margin-bottom: 6px;
+  color: #000;
+  font-size: 14px;
+}
+
+.message-text {
+  color: #090808;
+  line-height: 1.5;
+}
+
+.system-status {
+  display: inline-flex;
+  align-items: center;
+  justify-self: center;
+  gap: 7px;
+  padding: 8px 14px;
+  border-radius: 8px;
+  background: #f3f4f6;
+  color: #555;
+  font-size: 14px;
+  font-style: italic;
+  text-align: center;
+}
+
+.thinking-bubble {
+  opacity: 0.75;
+  font-style: italic;
+}
+
+.thinking-content {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  min-height: 20px;
+  color: #090808;
+  line-height: 1.5;
+}
+
+.typing-dots {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  height: 14px;
+}
+
+.typing-dots span {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: currentColor;
+  animation: typing-dot-bounce 1.2s infinite ease-in-out;
+}
+
+.typing-dots span:nth-child(2) {
+  animation-delay: 0.15s;
+}
+
+.typing-dots span:nth-child(3) {
+  animation-delay: 0.3s;
+}
+
+@keyframes typing-dot-bounce {
+  0%,
+  60%,
+  100% {
+    opacity: 0.35;
+    transform: translateY(0);
+  }
+
+  30% {
+    opacity: 1;
+    transform: translateY(-3px);
+  }
+}
+
+@media (max-width: 600px) {
+  .message-bubble {
+    max-width: 88%;
+  }
+}
