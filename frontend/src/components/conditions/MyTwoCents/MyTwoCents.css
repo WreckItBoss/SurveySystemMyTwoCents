@@ -1,0 +1,327 @@
+/* Full-bleed bar that spans the entire viewport width even inside a centered container */
+.debate-header-outer {
+  background: #1e293b;               /* bar color */
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+
+  /* full-bleed trick */
+  width: 100%;
+}
+
+/* Centered content inside the full-bleed bar */
+.debate-header {
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  max-width: 1200px;                  /* match your app width if you like */
+  margin: 0 auto;
+  padding: 12px 20px;
+  color: white;
+}
+
+/* Keep your existing bits */
+.debate-header-title { font-size: 18px; font-weight: 600; }
+/* ===== Page layout ===== */
+.debate-page {
+  position: relative;
+  box-sizing: border-box;
+  width: 100%;                           /* <-- use % */
+  margin-left: calc(50% - 50vw);
+  margin-right: calc(50% - 50vw);
+  padding: 0 16px;                        /* optional gutters */
+  overflow-x: hidden;                     /* safety */
+}
+
+
+.debate-body {
+  width: 100%;           /* center the content area under your full-width header */
+  margin: 0;
+  padding: 0px 16px;
+}
+
+.debate-container {
+  display: grid;
+  gap: 16px;
+  max-width: none;
+  align-items: start;
+  width: 100%;            /* full width grid */
+}
+
+.debate-container.single{
+  grid-template-columns: 1fr;
+}
+
+
+.debate-container.split{
+  grid-template-columns: 1fr 1fr;
+}
+
+/* ===== Controls ===== */
+.control-bar {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin: 12px 0 16px;
+}
+
+.control-bar button {
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  background: #fff;
+  cursor: pointer;
+}
+
+.control-bar button:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.control-bar select {
+  padding: 6px 8px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  background: #fff;
+}
+
+.control-bar span {
+  margin-left: 8px;
+  font-size: 12px;
+  color: #666;
+}
+
+/* ===== Split container ===== */
+.debate-container {
+  position: relative;
+  display: grid;
+  gap: 16px;
+  align-items: start;
+}
+
+.debate-container.single {
+  grid-template-columns: 1fr;     /* article full width */
+}
+
+.debate-container.split {
+  grid-template-columns: 1fr 1fr; /* 50 / 50 article + debate */
+}
+
+/* ===== Panels ===== */
+.panel {
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  background: #fff;
+  overflow: hidden;
+}
+
+.panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  border-bottom: 1px solid #e5e7eb;
+  background: #f9fafb;
+}
+
+.panel-body {
+  padding: 16px;
+  max-height: 70vh;              /* keeps long content scrollable */
+  overflow: auto;
+  text-align: left;
+}
+
+/* ===== Article meta ===== */
+.meta {
+  color: #666;
+  font-size: 13px;
+  margin-top: 6px;
+}
+
+/* ===== Team roster & badges ===== */
+.team-columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.team {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.team.right {
+  justify-content: flex-end;
+}
+
+.team-title {
+  margin-bottom: 6px;
+  color: #6b7280;
+  font-weight: 600;
+}
+
+.team-title.right {
+  text-align: right;
+}
+
+.agent-badge {
+  padding: 8px 12px;
+  border-radius: 999px;
+  color: #000;
+  font-size: 15px;
+  font-weight: 600;
+}
+.agent-badge.support {
+  border: 1px solid rgb(172, 209, 249);
+  background: rgb(172, 209, 249);
+}
+.agent-badge.oppose {
+  border: 1px solid rgb(246, 169, 169);
+  background: rgb(246, 169, 169);
+}
+.agent-badge.right {
+  border-color: #cfe0ff;
+  background: #eef6ff;
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 900px) {
+  .debate-container.split {
+    grid-template-columns: 1fr;  /* stack on small screens */
+  }
+
+  .panel-body {
+    max-height: none;            /* allow natural height on mobile */
+  }
+}
+
+/* ===== Debate Controls (inside panel) ===== */
+.debate-controls {
+  display: flex;
+  flex-direction: column; /* stack rows */
+  gap: 16px;              /* space between rows */
+  margin-bottom: 20px;
+}
+.control-row {
+  display: flex;
+  flex-direction: column; /* label + input stacked */
+  gap: 6px;
+}
+
+.control-row p {
+  margin: 0;
+  font-weight: 500;
+}
+
+.debate-controls select,
+.debate-controls button {
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  background: #fff;
+  cursor: pointer;
+}
+
+.debate-controls button:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.toggle-section {
+  margin: 16px 0;
+}
+
+.toggle-question {
+  font-size: 14px;
+  margin-bottom: 8px;
+  color: #333;
+}
+
+.toggle-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.toggle-buttons button.active {
+  background: #1e293b;
+  color: white;
+  border-color: #1e293b;
+}
+
+.toggle-buttons button {
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  background: #f3f4f6;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.toggle-buttons button:hover {
+  background: #e5e7eb;
+}
+
+.toggle-buttons button.active {
+  background: #1e293b;   /* dark slate */
+  color: white;
+  border-color: #1e293b;
+}
+
+.chat-divider {
+  width: 100%;
+  height: 1px;
+  background: #d1d5db; /* light gray */
+  margin: 24px 0;
+}
+
+.topic-header {
+  margin-bottom: 20px;
+  text-align: center;
+  font-size: 20px;
+  line-height: 1.4;
+}
+
+.topic-label {
+  color: #6b7280;
+  font-weight: 600;
+}
+
+.topic-name {
+  color: #111827;
+  font-weight: 700;
+}
+
+
+
+/* Article Content */
+.article-content {
+  margin-top: 12px;
+  line-height: 1.8;
+  color: #111;
+}
+
+.article-content p {
+  margin: 1rem 0;
+  text-align: justify;
+  text-justify: inter-ideograph;
+}
+
+.article-content h2 {
+  font-size: 1.15rem;
+  margin: 1.6rem 0 0.6rem;
+}
+
+.article-content h3 {
+  font-size: 1.1rem;
+  margin: 1.6rem 0 0.6rem;
+}
+
+.article-content strong {
+  font-weight: 700;
+}
+
+.article-content a {
+  color: #2563eb;
+  overflow-wrap: anywhere;
+}
