@@ -2,7 +2,7 @@ import PostSurveyQuestions, {
   freeCommentQuestion,
 } from "../../components/Questions/PostSurveyQuestions/PostSurveyQuestions";
 import QuestionScale from "../../components/QuestionScale/QuestionScale";
-import FreeTextArea from "../../components/Questions/FreeTextArea/FreeTextArea";
+import FreeTextArea from "../../components/FreeTextArea/FreeTextArea";
 import PageNavigation from "../../components/PageNavigation/PageNavigation";
 import "./PostSurveyPage.css";
 
