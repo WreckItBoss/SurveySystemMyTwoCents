@@ -21,7 +21,7 @@ const stanceOptions = [
   "強く反対",
 ];
 
-export function createPostSurveyQuestions(topic, condition) {
+export default function createPostSurveyQuestions(topic, condition) {
   const isMyTwoCents = condition === "mytwocents";
 
   const contentLabel = isMyTwoCents
