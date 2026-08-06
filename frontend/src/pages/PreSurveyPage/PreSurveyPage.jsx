@@ -1,5 +1,5 @@
 import PreSurveyQuestions from "../../components/Questions/PreSurveyQuestions/PreSurveyQuestions";
-import QuestionScale from "../../components/Questions/QuestionScale/QuestionScale";
+import QuestionScale from "../../components/QuestionScale/QuestionScale";
 import PageNavigation from "../../components/PageNavigation/PageNavigation";
 import "./PreSurveyPage.css";
 
