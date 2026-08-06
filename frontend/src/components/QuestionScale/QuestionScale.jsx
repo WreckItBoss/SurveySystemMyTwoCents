@@ -1,50 +1,39 @@
 import "./QuestionScale.css";
 
 export default function QuestionScale({
-    id,
-    question,
-    value,
-    onChange,
-    required = true,
-    min = 1,
-    max = 5,
-    minLabel = "全くそう思わない",
-    maxLabel = "非常にそう思う",
-}){
-    const options = Array.from({length: max-min+1},(_, i) => min+i);
-    const handleChange = (event) =>{
-        onChange(event.target.value);
-    }
+  label,
+  options,
+  value,
+  onChange,
+  required = false,
+}) {
   return (
-    <fieldset className="likert-scale">
-      <legend className="likert-scale__question">
-        {question}
+    <fieldset className="question-scale">
+      <legend className="question-scale__question">
+        {label}
+
         {required && (
-          <span className="likert-scale__required" aria-label="必須">
+          <span className="question-scale__required" aria-label="必須">
             *
           </span>
         )}
       </legend>
 
-      <div className="likert-scale__labels">
-        <span>{minLabel}</span>
-        <span>{maxLabel}</span>
-      </div>
-
-      <div className="likert-scale__options">
+      <div className="question-scale__options">
         {options.map((option) => (
           <label
             key={option}
-            className={`likert-scale__option ${
-              value === option ? "likert-scale__option--selected" : ""
+            className={`question-scale__option ${
+              value === option
+                ? "question-scale__option--selected"
+                : ""
             }`}
           >
             <input
               type="radio"
-              name={id}
               value={option}
               checked={value === option}
-              onChange={handleChange}
+              onChange={() => onChange(option)}
               required={required}
             />
 
