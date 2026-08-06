@@ -1,122 +1,201 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
+import { useState } from "react";
 
-function App() {
-  const [count, setCount] = useState(0)
+import ConsentPage from "./pages/ConsentPage/ConsentPage";
+import PreSurveyPage from "./pages/PreSurveyPage/PreSurveyPage";
+import ExperimentPage from "./pages/ExperimentPage/ExperimentPage";
+import PostSurveyPage from "./pages/PostSurveyPage/PostSurveyPage";
+import CompletionPage from "./pages/CompletionPage/CompletionPage";
+
+const PAGE_ORDER = [
+  "consent",
+  "preSurvey",
+  "experiment",
+  "postSurvey",
+  "completion",
+];
+
+const initialResponses = {
+  preSurvey: {
+    ageGroup: null,
+    gender: null,
+    preStance: null,
+    topicKnowledge: null,
+  },
+
+  postSurvey: {
+    understanding: null,
+    newInformation: null,
+    furtherExploration: null,
+    chatbotAppropriateness: null,
+    chatbotTrustworthiness: null,
+    chatbotEngagement: null,
+    postStance: null,
+    freeComment: "",
+  },
+
+  completionCheck: {
+    keyword: null,
+  },
+};
+
+export default function App() {
+  const [currentPageIndex, setCurrentPageIndex] = useState(0);
+
+  // Temporary hardcoded assignment.
+  // This will later come from the backend.
+  const [assignment] = useState({
+    sessionId: "TEMP-SESSION-001",
+    topic: "原子力発電",
+    condition: "mytwocents",
+    pattern: "P01",
+  });
+
+  const [responses, setResponses] = useState(initialResponses);
+
+  const [completionCode, setCompletionCode] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState("");
+
+  const currentPage = PAGE_ORDER[currentPageIndex];
+
+  function scrollToTop() {
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
+  }
+
+  function goNext() {
+    setCurrentPageIndex((previousIndex) =>
+      Math.min(previousIndex + 1, PAGE_ORDER.length - 1),
+    );
+
+    scrollToTop();
+  }
+
+  function goPrevious() {
+    setCurrentPageIndex((previousIndex) =>
+      Math.max(previousIndex - 1, 0),
+    );
+
+    scrollToTop();
+  }
+
+  function updatePreSurveyAnswer(questionKey, value) {
+    setResponses((previousResponses) => ({
+      ...previousResponses,
+
+      preSurvey: {
+        ...previousResponses.preSurvey,
+        [questionKey]: value,
+      },
+    }));
+  }
+
+  function updatePostSurveyAnswer(questionKey, value) {
+    setResponses((previousResponses) => ({
+      ...previousResponses,
+
+      postSurvey: {
+        ...previousResponses.postSurvey,
+        [questionKey]: value,
+      },
+    }));
+  }
+
+  function updateCompletionKeyword(value) {
+    setResponses((previousResponses) => ({
+      ...previousResponses,
+
+      completionCheck: {
+        ...previousResponses.completionCheck,
+        keyword: value,
+      },
+    }));
+  }
+
+  async function submitStudy() {
+    if (isSubmitting || completionCode) {
+      return;
+    }
+
+    setIsSubmitting(true);
+    setSubmitError("");
+
+    const submissionData = {
+      sessionId: assignment.sessionId,
+      topic: assignment.topic,
+      condition: assignment.condition,
+      pattern: assignment.pattern,
+      responses,
+    };
+
+    try {
+      // Temporary frontend-only simulation.
+      console.log("Submitting study data:", submissionData);
+
+      await new Promise((resolve) => {
+        setTimeout(resolve, 1000);
+      });
+
+      // Temporary code until the backend generates one.
+      setCompletionCode("MTC8264");
+    } catch (error) {
+      console.error("Submission failed:", error);
+
+      setSubmitError(
+        "回答の保存に失敗しました。通信環境をご確認のうえ、もう一度お試しください。",
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
 
   return (
     <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
+      {currentPage === "consent" && (
+        <ConsentPage onNext={goNext} />
+      )}
 
-      <div className="ticks"></div>
+      {currentPage === "preSurvey" && (
+        <PreSurveyPage
+          topic={assignment.topic}
+          answers={responses.preSurvey}
+          onAnswerChange={updatePreSurveyAnswer}
+          onPrevious={goPrevious}
+          onNext={goNext}
+        />
+      )}
 
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
+      {currentPage === "experiment" && (
+        <ExperimentPage
+          assignment={assignment}
+          onPrevious={goPrevious}
+          onNext={goNext}
+        />
+      )}
 
-      <div className="ticks"></div>
-      <section id="spacer"></section>
+      {currentPage === "postSurvey" && (
+        <PostSurveyPage
+          topic={assignment.topic}
+          condition={assignment.condition}
+          answers={responses.postSurvey}
+          onAnswerChange={updatePostSurveyAnswer}
+          onPrevious={goPrevious}
+          onSubmit={goNext}
+        />
+      )}
+
+      {currentPage === "completion" && (
+        <CompletionPage
+          selectedKeyword={responses.completionCheck.keyword}
+          onKeywordChange={updateCompletionKeyword}
+          onSubmit={submitStudy}
+          completionCode={completionCode}
+          isSubmitting={isSubmitting}
+          submitError={submitError}
+        />
+      )}
     </>
-  )
+  );
 }
-
-export default App
