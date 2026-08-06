@@ -1,4 +1,4 @@
-import QuestionScale from "../../components/Questions/QuestionScale/QuestionScale";
+import QuestionScale from "../../components//QuestionScale/QuestionScale";
 import "./CompletionPage.css";
 
 const keywordOptions = ["ライオン", "犬", "ワニ"];
