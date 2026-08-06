@@ -1,6 +1,6 @@
-import "./LikertScale.css";
+import "./QuestionScale.css";
 
-export default function LikertScale({
+export default function QuestionScale({
     id,
     question,
     value,
