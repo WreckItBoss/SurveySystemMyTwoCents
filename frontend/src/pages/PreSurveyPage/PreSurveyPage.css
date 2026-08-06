@@ -1,0 +1,59 @@
+.pre-survey-page {
+  width: 100%;
+  min-height: 100vh;
+  padding: 48px 20px;
+  background: #f4f6f8;
+}
+
+.pre-survey-page__card {
+  width: min(820px, 100%);
+  margin: 0 auto;
+  padding: 40px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  box-shadow: 0 12px 32px rgba(15, 23, 42, 0.08);
+}
+
+.pre-survey-page__header {
+  padding-bottom: 24px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.pre-survey-page__header h1 {
+  margin: 6px 0 12px;
+  font-size: 1.8rem;
+}
+
+.pre-survey-page__header p {
+  margin-bottom: 0;
+  color: #64748b;
+  line-height: 1.8;
+}
+
+.pre-survey-page__eyebrow {
+  margin: 0;
+  font-size: 0.9rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.pre-survey-page__questions {
+  display: grid;
+  gap: 24px;
+  padding-top: 28px;
+}
+
+@media (max-width: 640px) {
+  .pre-survey-page {
+    padding: 20px 12px;
+  }
+
+  .pre-survey-page__card {
+    padding: 24px 16px;
+  }
+
+  .pre-survey-page__header h1 {
+    font-size: 1.5rem;
+  }
+}
