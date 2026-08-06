@@ -1,5 +1,5 @@
 import { useState } from "react";
-import PageNavigation from "../../components/questionnaire/PageNavigation/PageNavigation";
+import PageNavigation from "../../components/PageNavigation/PageNavigation";
 import "./ConsentPage.css";
 
 export default function ConsentPage({ onNext }) {
