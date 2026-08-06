@@ -1,0 +1,93 @@
+.consent-page {
+  width: 100%;
+  min-height: 100vh;
+  padding: 48px 20px;
+  background: #f4f6f8;
+}
+
+.consent-card {
+  width: min(820px, 100%);
+  margin: 0 auto;
+  padding: 40px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  box-shadow: 0 12px 32px rgba(15, 23, 42, 0.08);
+}
+
+.consent-header {
+  padding-bottom: 24px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.consent-header h1 {
+  margin: 6px 0 0;
+  font-size: 2rem;
+  line-height: 1.4;
+}
+
+.consent-eyebrow {
+  margin: 0;
+  color: #64748b;
+  font-size: 0.9rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.consent-content {
+  display: grid;
+  gap: 28px;
+  padding-top: 28px;
+}
+
+.consent-content section {
+  display: grid;
+  gap: 8px;
+}
+
+.consent-content h2 {
+  margin: 0;
+  font-size: 1.15rem;
+}
+
+.consent-content p {
+  margin: 0;
+  color: #475569;
+  line-height: 1.8;
+}
+
+.consent-checkbox {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 18px;
+  background: #f8fafc;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.consent-checkbox input {
+  width: 18px;
+  height: 18px;
+  margin-top: 3px;
+}
+
+.consent-checkbox span {
+  line-height: 1.7;
+}
+
+@media (max-width: 640px) {
+  .consent-page {
+    padding: 20px 12px;
+  }
+
+  .consent-card {
+    padding: 24px 20px;
+    border-radius: 12px;
+  }
+
+  .consent-header h1 {
+    font-size: 1.55rem;
+  }
+}
