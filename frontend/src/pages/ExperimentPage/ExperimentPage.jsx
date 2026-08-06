@@ -1,34 +1,35 @@
-import MyTwoCents from "../../components/conditions/MyTwoCents/components/Navigator/Navigator";
-import NewsOnly from "../../components/conditions/MyTwoCents/components/NewsOnly/NewsOnly";
+import NewsOnly from "../../components/conditions/NewsOnly/NewsOnly";
+import MyTwoCents from "../../components/conditions/MyTwoCents/MyTwoCents";
 
-export default function ExperimentPage({ assignment, onComplete}) {
-    if (!assignment) {
-        return <p>実験内容を読み込んでいます...</p>;
-    }
+export default function ExperimentPage({
+  assignment,
+  onPrevious,
+  onNext,
+}) {
+  if (!assignment) {
+    return <p>実験内容を読み込んでいます...</p>;
+  }
 
-    if (assignment.condition === "MyTwoCents"){
-        return(
-            <div>
-                <MyTwoCents 
-                    topic = {assignment.topic}
-                    pattern = {assignment.pattern}
-                    onComplete = {onComplete}
+  if (assignment.condition === "news") {
+    return (
+      <NewsOnly
+        topic={assignment.topic}
+        onPrevious={onPrevious}
+        onNext={onNext}
+      />
+    );
+  }
 
-                />
-            </div>
-        );
-    }
+  if (assignment.condition === "mytwocents") {
+    return (
+      <MyTwoCents
+        topic={assignment.topic}
+        pattern={assignment.pattern}
+        onPrevious={onPrevious}
+        onNext={onNext}
+      />
+    );
+  }
 
-    if(assignment.condition === "NewsOnly"){
-        return(
-            <div>
-                <NewsOnly 
-                    topic = {assignment.topic}
-                    onComplete = {onComplete}
-                />
-            </div>
-        );
-    }
-
-    return <p>実験条件を読み込めませんでした。</p>;
+  return <p>実験条件が正しく設定されていません。</p>;
 }
