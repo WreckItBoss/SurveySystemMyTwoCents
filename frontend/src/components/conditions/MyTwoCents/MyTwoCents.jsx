@@ -3,8 +3,8 @@ import {
   getArticle,
   generateDebate,
 } from "./mock/mockAPI.jsx";
-import MessageList from "./components/MessageList.jsx";
-import "./App.css";
+import MessageList from "./components/MessageList/MessageList.jsx";
+import "./MyTwoCents.css";
 import Navigator from "./components/Navigator/Navigator.jsx";
 
 export default function Debate() {
