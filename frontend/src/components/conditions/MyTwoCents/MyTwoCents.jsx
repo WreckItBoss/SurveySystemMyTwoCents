@@ -8,7 +8,7 @@ import "./MyTwoCents.css";
 import Navigator from "./components/Navigator/Navigator.jsx";
 import PageNavigation from "../../PageNavigation/PageNavigation.jsx";
 
-export default function Debate({onPrevious, onNext}) {
+export default function MyTwoCents({topic, pattern, onPrevious, onNext}) {
   const [showChat, setShowChat] = useState(true);
 
   const [article, setArticle] = useState(null);
@@ -26,7 +26,7 @@ export default function Debate({onPrevious, onNext}) {
         const [articleResponse, debateResponse] =
           await Promise.all([
             getArticle(),
-            generateDebate(),
+            generateDebate(topic, pattern),
           ]);
 
         setArticle(articleResponse);
@@ -47,7 +47,7 @@ export default function Debate({onPrevious, onNext}) {
     };
 
     loadPageData();
-  }, []);
+  }, [topic, pattern]);
 
   const agents = debate?.agents ?? [];
   const messages = debate?.messages ?? [];

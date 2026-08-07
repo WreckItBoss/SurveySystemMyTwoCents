@@ -1,4 +1,3 @@
-// src/mock/mockAPI.jsx
 import nuclearPattern1 from "../conversation/NuclearEnergy/pattern1.js";
 import nuclearPattern2 from "../conversation/NuclearEnergy/pattern2.js";
 import nuclearPattern3 from "../conversation/NuclearEnergy/pattern3.js";
@@ -16,63 +15,58 @@ import surveillancePattern2 from "../conversation/Surveillance/pattern2.js";
 import surveillancePattern3 from "../conversation/Surveillance/pattern3.js";
 import surveillancePattern4 from "../conversation/Surveillance/pattern4.js";
 import surveillancePattern5 from "../conversation/Surveillance/pattern5.js";
-const MOCK_ARTICLE = "NuclearEnergy";
 
 const MOCK_CONFIG = {
-  NuclearEnergy: {
+  nuclearenergy: {
     file: "/NuclearEnergy.html",
-    topic: "原子力発電",
+    topicLabel: "原子力発電",
     conversations: {
-      1: nuclearPattern1,
-      2: nuclearPattern2,
-      3: nuclearPattern3,
-      4: nuclearPattern4,
-      5: nuclearPattern5,
+      P01: nuclearPattern1,
+      P02: nuclearPattern2,
+      P03: nuclearPattern3,
+      P04: nuclearPattern4,
+      P05: nuclearPattern5,
     },
   },
 
-  SelfDrivingCars: {
+  selfdrivingcars: {
     file: "/SelfDrivingCars.html",
-    topic: "自動運転",
+    topicLabel: "自動運転",
     conversations: {
-      1: selfDrivingPattern1,
-      2: selfDrivingPattern2,
-      3: selfDrivingPattern3,
-      4: selfDrivingPattern4,
-      5: selfDrivingPattern5,
+      P01: selfDrivingPattern1,
+      P02: selfDrivingPattern2,
+      P03: selfDrivingPattern3,
+      P04: selfDrivingPattern4,
+      P05: selfDrivingPattern5,
     },
   },
 
-  Surveillance: {
+  surveillance: {
     file: "/Surveillance.html",
-    topic: "超監視時代",
+    topicLabel: "超監視時代",
     conversations: {
-      1: surveillancePattern1,
-      2: surveillancePattern2,
-      3: surveillancePattern3,
-      4: surveillancePattern4,
-      5: surveillancePattern5,
+      P01: surveillancePattern1,
+      P02: surveillancePattern2,
+      P03: surveillancePattern3,
+      P04: surveillancePattern4,
+      P05: surveillancePattern5,
     },
   },
 };
 
-function getSelectedConfig() {
-  const params = new URLSearchParams(window.location.search);
-
-  const topicKey = params.get("topic");
-  const patternNumber = Number(params.get("pattern"));
-
-  const topicConfig = MOCK_CONFIG[topicKey];
+function getSelectedConfig(topic, pattern) {
+  const topicConfig = MOCK_CONFIG[topic];
 
   if (!topicConfig) {
-    throw new Error("Invalid or missing topic.");
+    throw new Error(`Invalid or missing topic: ${topic}`);
   }
 
-  const conversation =
-    topicConfig.conversations[patternNumber];
+  const conversation = topicConfig.conversations[pattern];
 
   if (!conversation) {
-    throw new Error("Invalid or missing conversation pattern.");
+    throw new Error(
+      `Invalid or missing conversation pattern: ${pattern}`,
+    );
   }
 
   return {
@@ -81,8 +75,8 @@ function getSelectedConfig() {
   };
 }
 
-export async function getArticle() {
-  const config = getSelectedConfig();
+export async function getArticle(topic, pattern) {
+  const config = getSelectedConfig(topic, pattern);
 
   const res = await fetch(config.file);
 
@@ -91,6 +85,7 @@ export async function getArticle() {
   }
 
   const html = await res.text();
+
   const doc = new DOMParser().parseFromString(
     html,
     "text/html",
@@ -120,17 +115,17 @@ export async function getArticle() {
     id: "news-1",
     title,
     source,
-    topic: config.topic,
+    topic: config.topicLabel,
     date,
     contentHtml,
   };
 }
 
-export async function generateDebate() {
-  const config = getSelectedConfig();
+export async function generateDebate(topic, pattern) {
+  const config = getSelectedConfig(topic, pattern);
 
   return {
-    topics: [config.topic],
+    topics: [config.topicLabel],
     agents: config.conversation.agents,
     messages: config.conversation.messages,
   };
