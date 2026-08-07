@@ -1,3 +1,7 @@
+import nuclearArticle from "../newsarticle/NuclearEnergy.html?raw";
+import selfDrivingArticle from "../newsarticle/SelfDrivingCars.html?raw";
+import surveillanceArticle from "../newsarticle/Surveillance.html?raw";
+
 import nuclearPattern1 from "../conversation/NuclearEnergy/pattern1.js";
 import nuclearPattern2 from "../conversation/NuclearEnergy/pattern2.js";
 import nuclearPattern3 from "../conversation/NuclearEnergy/pattern3.js";
@@ -18,7 +22,7 @@ import surveillancePattern5 from "../conversation/Surveillance/pattern5.js";
 
 const MOCK_CONFIG = {
   nuclearenergy: {
-    file: "/NuclearEnergy.html",
+    articleHtml: nuclearArticle,
     topicLabel: "原子力発電",
     conversations: {
       P01: nuclearPattern1,
@@ -30,7 +34,7 @@ const MOCK_CONFIG = {
   },
 
   selfdrivingcars: {
-    file: "/SelfDrivingCars.html",
+    articleHtml: selfDrivingArticle,
     topicLabel: "自動運転",
     conversations: {
       P01: selfDrivingPattern1,
@@ -42,7 +46,7 @@ const MOCK_CONFIG = {
   },
 
   surveillance: {
-    file: "/Surveillance.html",
+    articleHtml: surveillanceArticle,
     topicLabel: "超監視時代",
     conversations: {
       P01: surveillancePattern1,
@@ -78,13 +82,7 @@ function getSelectedConfig(topic, pattern) {
 export async function getArticle(topic, pattern) {
   const config = getSelectedConfig(topic, pattern);
 
-  const res = await fetch(config.file);
-
-  if (!res.ok) {
-    throw new Error(`Failed to load ${config.file}`);
-  }
-
-  const html = await res.text();
+  const html = config.articleHtml;
 
   const doc = new DOMParser().parseFromString(
     html,

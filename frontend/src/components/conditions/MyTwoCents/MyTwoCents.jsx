@@ -9,6 +9,10 @@ import Navigator from "./components/Navigator/Navigator.jsx";
 import PageNavigation from "../../PageNavigation/PageNavigation.jsx";
 
 export default function MyTwoCents({topic, pattern, onPrevious, onNext}) {
+    console.log("MyTwoCents props:", {
+  topic,
+  pattern,
+});
   const [showChat, setShowChat] = useState(true);
 
   const [article, setArticle] = useState(null);
@@ -25,7 +29,7 @@ export default function MyTwoCents({topic, pattern, onPrevious, onNext}) {
 
         const [articleResponse, debateResponse] =
           await Promise.all([
-            getArticle(),
+            getArticle(topic, pattern),
             generateDebate(topic, pattern),
           ]);
 
