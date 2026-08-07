@@ -2,6 +2,8 @@ import nuclearEnergyHtml from "./nuclearenergy.html?raw";
 import selfDrivingCarsHtml from "./selfdrivingcars.html?raw";
 import surveillanceHtml from "./surveillance.html?raw";
 
+import PageNavigation from "../../PageNavigation/PageNavigation";
+
 // import "./NewsOnly.css";
 
 const articles = {
@@ -10,7 +12,11 @@ const articles = {
   surveillance: surveillanceHtml,
 };
 
-export default function NewsOnly({ topic }) {
+export default function NewsOnly({
+  topic,
+  onPrevious,
+  onNext,
+}) {
   const articleHtml = articles[topic];
 
   if (!articleHtml) {
@@ -21,7 +27,15 @@ export default function NewsOnly({ topic }) {
     <div className="news-only">
       <article
         className="news-only__article"
-        dangerouslySetInnerHTML={{ __html: articleHtml }}
+        dangerouslySetInnerHTML={{
+          __html: articleHtml,
+        }}
+      />
+
+      <PageNavigation
+        onPrevious={onPrevious}
+        onNext={onNext}
+        nextLabel="事後アンケートへ進む"
       />
     </div>
   );
