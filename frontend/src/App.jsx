@@ -48,7 +48,8 @@ export default function App() {
   // This will later come from the backend.
   const [assignment] = useState({
     sessionId: "TEMP-SESSION-001",
-    topic: "原子力発電",
+    topic: "nuclearenergy",
+    topicLabel: "原子力発電",
     condition: "mytwocents",
     pattern: "P01",
   });
@@ -171,7 +172,7 @@ async function submitStudy() {
 
   try {
     const response = await fetch(
-      "http://localhost:5000/api/responses",
+      "http://localhost:5050/api/responses",
       {
         method: "POST",
         headers: {
@@ -182,11 +183,13 @@ async function submitStudy() {
     );
 
     const result = await response.json();
+    console.log("Backend response:", result);
 
     if (!response.ok) {
       throw new Error(
+        result.errors?.join(", ") ||
         result.message ||
-          "回答の保存に失敗しました。",
+        "回答の保存に失敗しました。",
       );
     }
 
@@ -211,7 +214,7 @@ async function submitStudy() {
 
       {currentPage === "preSurvey" && (
         <PreSurveyPage
-          topic={assignment.topic}
+          topic={assignment.topicLabel}
           answers={responses.preSurvey}
           onAnswerChange={updatePreSurveyAnswer}
           onPrevious={goPrevious}
@@ -229,7 +232,7 @@ async function submitStudy() {
 
       {currentPage === "postSurvey" && (
         <PostSurveyPage
-          topic={assignment.topic}
+          topic={assignment.topicLabel}
           condition={assignment.condition}
           answers={responses.postSurvey}
           onAnswerChange={updatePostSurveyAnswer}

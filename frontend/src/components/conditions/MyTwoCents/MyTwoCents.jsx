@@ -225,12 +225,12 @@ export default function Debate({onPrevious, onNext}) {
         <PageNavigation
             onPrevious={onPrevious}
             onNext={onNext}
-            nextDisabled={
-              loadingArticle ||
-              !article ||
-              !debate ||
-              Boolean(debateError)
-            }
+            // nextDisabled={
+            //   loadingArticle ||
+            //   !article ||
+            //   !debate ||
+            //   Boolean(debateError)
+            // }
             nextLabel="事後アンケートへ進む"
           />
         </div>

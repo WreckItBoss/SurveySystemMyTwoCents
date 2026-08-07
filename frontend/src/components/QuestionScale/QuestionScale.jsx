@@ -9,11 +9,7 @@ export default function QuestionScale({
     <fieldset className="question-scale">
       <legend className="question-scale__question">
         {label}
-        {required && (
-          <span className="question-scale__required">
-            *
-          </span>
-        )}
+        {required && <span>*</span>}
       </legend>
 
       <div className="question-scale__options">
@@ -29,21 +25,12 @@ export default function QuestionScale({
               : option;
 
           return (
-            <label
-              key={optionValue}
-              className={`question-scale__option ${
-                value === optionValue
-                  ? "question-scale__option--selected"
-                  : ""
-              }`}
-            >
+            <label key={optionValue}>
               <input
                 type="radio"
                 value={optionValue}
                 checked={value === optionValue}
-                onChange={() =>
-                  onChange(optionValue)
-                }
+                onChange={() => onChange(optionValue)}
                 required={required}
               />
 

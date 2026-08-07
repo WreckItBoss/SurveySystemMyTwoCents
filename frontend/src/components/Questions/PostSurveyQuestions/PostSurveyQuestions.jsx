@@ -1,24 +1,24 @@
 const agreementOptions = [
-  "全くそう思わない",
-  "あまりそう思わない",
-  "どちらともいえない",
-  "少しそう思う",
-  "とてもそう思う",
+  { value: 1, label: "全くそう思わない" },
+  { value: 2, label: "あまりそう思わない" },
+  { value: 3, label: "どちらともいえない" },
+  { value: 4, label: "少しそう思う" },
+  { value: 5, label: "とてもそう思う" },
 ];
 
 const understandingOptions = [
-  "全く理解できなかった",
-  "あまり理解できなかった",
-  "どちらともいえない",
-  "少し理解できた",
-  "とても理解できた",
+  { value: 1, label: "全く理解できなかった" },
+  { value: 2, label: "あまり理解できなかった" },
+  { value: 3, label: "どちらともいえない" },
+  { value: 4, label: "少し理解できた" },
+  { value: 5, label: "とても理解できた" },
 ];
 
 const stanceOptions = [
-  "強く賛成",
-  "やや賛成",
-  "やや反対",
-  "強く反対",
+  { value: 4, label: "強く賛成" },
+  { value: 3, label: "やや賛成" },
+  { value: 2, label: "やや反対" },
+  { value: 1, label: "強く反対" },
 ];
 
 export default function createPostSurveyQuestions(topic, condition) {

@@ -4,8 +4,17 @@ import responseRoutes from "./routes/responseRoutes.js";
 
 const app = express();
 
-app.use(cors());
+app.use(
+  cors({
+    origin: "http://localhost:5173",
+  }),
+);
+
 app.use(express.json());
+
+app.get("/api/health", (_req, res) => {
+  res.json({ status: "ok" });
+});
 
 app.use("/api/responses", responseRoutes);
 
