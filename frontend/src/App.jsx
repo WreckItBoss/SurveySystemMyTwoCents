@@ -39,6 +39,9 @@ const initialResponses = {
 };
 
 export default function App() {
+  const [startedAt] = useState(
+    () => new Date().toISOString(),
+  );
   const [currentPageIndex, setCurrentPageIndex] = useState(0);
 
   // Temporary hardcoded assignment.
