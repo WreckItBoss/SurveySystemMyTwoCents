@@ -114,42 +114,91 @@ export default function App() {
     }));
   }
 
-  async function submitStudy() {
-    if (isSubmitting || completionCode) {
-      return;
-    }
-
-    setIsSubmitting(true);
-    setSubmitError("");
-
-    const submissionData = {
-      sessionId: assignment.sessionId,
-      topic: assignment.topic,
-      condition: assignment.condition,
-      pattern: assignment.pattern,
-      responses,
-    };
-
-    try {
-      // Temporary frontend-only simulation.
-      console.log("Submitting study data:", submissionData);
-
-      await new Promise((resolve) => {
-        setTimeout(resolve, 1000);
-      });
-
-      // Temporary code until the backend generates one.
-      setCompletionCode("MTC8264");
-    } catch (error) {
-      console.error("Submission failed:", error);
-
-      setSubmitError(
-        "回答の保存に失敗しました。通信環境をご確認のうえ、もう一度お試しください。",
-      );
-    } finally {
-      setIsSubmitting(false);
-    }
+async function submitStudy() {
+  if (isSubmitting || completionCode) {
+    return;
   }
+
+  setIsSubmitting(true);
+  setSubmitError("");
+
+  const submissionData = {
+    sessionId: assignment.sessionId,
+
+    topic: assignment.topic,
+    condition: assignment.condition,
+    pattern: assignment.pattern,
+
+    ageGroup: responses.preSurvey.ageGroup,
+    gender: responses.preSurvey.gender,
+
+    preStance: responses.preSurvey.preStance,
+    preKnowledge:
+      responses.preSurvey.topicKnowledge,
+
+    postUnderstanding:
+      responses.postSurvey.understanding,
+
+    postNewInformation:
+      responses.postSurvey.newInformation,
+
+    postFurtherExploration:
+      responses.postSurvey.furtherExploration,
+
+    chatbotAppropriateness:
+      responses.postSurvey.chatbotAppropriateness,
+
+    chatbotTrustworthiness:
+      responses.postSurvey.chatbotTrustworthiness,
+
+    chatbotEngagement:
+      responses.postSurvey.chatbotEngagement,
+
+    postStance:
+      responses.postSurvey.postStance,
+
+    freeComment:
+      responses.postSurvey.freeComment,
+
+    keywordAnswer:
+      responses.completionCheck.keyword,
+
+    startedAt,
+  };
+
+  try {
+    const response = await fetch(
+      "http://localhost:5000/api/responses",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(submissionData),
+      },
+    );
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      throw new Error(
+        result.message ||
+          "回答の保存に失敗しました。",
+      );
+    }
+
+    setCompletionCode(result.completionCode);
+  } catch (error) {
+    console.error("Submission failed:", error);
+
+    setSubmitError(
+      error.message ||
+        "回答の保存に失敗しました。もう一度お試しください。",
+    );
+  } finally {
+    setIsSubmitting(false);
+  }
+}
 
   return (
     <>
