@@ -6,8 +6,9 @@ import {
 import MessageList from "./components/MessageList/MessageList.jsx";
 import "./MyTwoCents.css";
 import Navigator from "./components/Navigator/Navigator.jsx";
+import PageNavigation from "../../PageNavigation/PageNavigation.jsx";
 
-export default function Debate() {
+export default function Debate({onPrevious, onNext}) {
   const [showChat, setShowChat] = useState(true);
 
   const [article, setArticle] = useState(null);
@@ -221,6 +222,17 @@ export default function Debate() {
               </section>
             )}
           </div>
+        <PageNavigation
+            onPrevious={onPrevious}
+            onNext={onNext}
+            nextDisabled={
+              loadingArticle ||
+              !article ||
+              !debate ||
+              Boolean(debateError)
+            }
+            nextLabel="事後アンケートへ進む"
+          />
         </div>
       </div>
     </>
