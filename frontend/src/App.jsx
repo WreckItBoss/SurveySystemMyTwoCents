@@ -123,93 +123,93 @@ export default function App() {
     }));
   }
 
-async function submitStudy() {
-  if (isSubmitting || completionCode) {
-    return;
-  }
-
-  setIsSubmitting(true);
-  setSubmitError("");
-
-  const submissionData = {
-    sessionId: assignment.sessionId,
-
-    topic: assignment.topic,
-    condition: assignment.condition,
-    pattern: assignment.pattern,
-
-    ageGroup: responses.preSurvey.ageGroup,
-    gender: responses.preSurvey.gender,
-
-    preStance: responses.preSurvey.preStance,
-    preKnowledge:
-      responses.preSurvey.topicKnowledge,
-
-    postUnderstanding:
-      responses.postSurvey.understanding,
-
-    postNewInformation:
-      responses.postSurvey.newInformation,
-
-    postFurtherExploration:
-      responses.postSurvey.furtherExploration,
-
-    chatbotAppropriateness:
-      responses.postSurvey.chatbotAppropriateness,
-
-    chatbotTrustworthiness:
-      responses.postSurvey.chatbotTrustworthiness,
-
-    chatbotEngagement:
-      responses.postSurvey.chatbotEngagement,
-
-    postStance:
-      responses.postSurvey.postStance,
-
-    freeComment:
-      responses.postSurvey.freeComment,
-
-    keywordAnswer:
-      responses.completionCheck.keyword,
-
-    startedAt,
-  };
-
-  try {
-    const response = await fetch(
-      "http://localhost:5050/api/responses",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(submissionData),
-      },
-    );
-
-    const result = await response.json();
-    console.log("Backend response:", result);
-
-    if (!response.ok) {
-      throw new Error(
-        result.errors?.join(", ") ||
-        result.message ||
-        "回答の保存に失敗しました。",
-      );
+  async function submitStudy() {
+    if (isSubmitting || completionCode) {
+      return;
     }
 
-    setCompletionCode(result.completionCode);
-  } catch (error) {
-    console.error("Submission failed:", error);
+    setIsSubmitting(true);
+    setSubmitError("");
 
-    setSubmitError(
-      error.message ||
-        "回答の保存に失敗しました。もう一度お試しください。",
-    );
-  } finally {
-    setIsSubmitting(false);
+    const submissionData = {
+      sessionId: assignment.sessionId,
+
+      topic: assignment.topic,
+      condition: assignment.condition,
+      pattern: assignment.pattern,
+
+      ageGroup: responses.preSurvey.ageGroup,
+      gender: responses.preSurvey.gender,
+
+      preStance: responses.preSurvey.preStance,
+      preKnowledge:
+        responses.preSurvey.topicKnowledge,
+
+      postUnderstanding:
+        responses.postSurvey.understanding,
+
+      postNewInformation:
+        responses.postSurvey.newInformation,
+
+      postFurtherExploration:
+        responses.postSurvey.furtherExploration,
+
+      chatbotAppropriateness:
+        responses.postSurvey.chatbotAppropriateness,
+
+      chatbotTrustworthiness:
+        responses.postSurvey.chatbotTrustworthiness,
+
+      chatbotEngagement:
+        responses.postSurvey.chatbotEngagement,
+
+      postStance:
+        responses.postSurvey.postStance,
+
+      freeComment:
+        responses.postSurvey.freeComment,
+
+      keywordAnswer:
+        responses.completionCheck.keyword,
+
+      startedAt,
+    };
+
+    try {
+      const response = await fetch(
+        "http://localhost:5050/api/responses",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(submissionData),
+        },
+      );
+
+      const result = await response.json();
+      console.log("Backend response:", result);
+
+      if (!response.ok) {
+        throw new Error(
+          result.errors?.join(", ") ||
+          result.message ||
+          "回答の保存に失敗しました。",
+        );
+      }
+
+      setCompletionCode(result.completionCode);
+    } catch (error) {
+      console.error("Submission failed:", error);
+
+      setSubmitError(
+        error.message ||
+          "回答の保存に失敗しました。もう一度お試しください。",
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
   }
-}
 
   return (
     <>
