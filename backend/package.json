@@ -6,7 +6,8 @@
 
   "scripts": {
     "dev": "nodemon src/server.js",
-    "start": "node src/server.js"
+    "start": "node src/server.js",
+    "seed:quotas": "node src/scripts/seedAssignmentQuotas.js"
   },
 
   "keywords": [],
