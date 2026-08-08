@@ -142,7 +142,7 @@ export async function createResponse(req, res, next) {
     return res.status(201).json({
       saved: true,
       responseId: savedResponse._id,
-      completionCode: TEMPORARY_COMPLETION_CODE,
+      completionCode,
     });
   } catch (error) {
     /*
