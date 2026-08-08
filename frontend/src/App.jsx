@@ -46,13 +46,17 @@ export default function App() {
 
   // Temporary hardcoded assignment.
   // This will later come from the backend.
-  const [assignment] = useState({
-    sessionId: "TEMP-SESSION-001",
-    topic: "nuclearenergy",
-    topicLabel: "原子力発電",
-    condition: "news",
-    // pattern: "P01",
-  });
+  // const [assignment] = useState({
+  //   sessionId: "TEMP-SESSION-001",
+  //   topic: "nuclearenergy",
+  //   topicLabel: "原子力発電",
+  //   condition: "news",
+  //   // pattern: "P01",
+  // });
+
+  const [assignment, setAssignment] = useState(null);
+  const [assignmentError, setAssignmentError] = useState("");
+  const [isLoadingAssignment, setIsLoadingAssignment] = useState(true);
 
   const [responses, setResponses] = useState(initialResponses);
 
