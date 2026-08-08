@@ -7,6 +7,7 @@ export default function CompletionPage({
   selectedKeyword,
   onKeywordChange,
   onSubmit,
+  onPrevious,
   completionCode,
   isSubmitting = false,
   submitError = "",
