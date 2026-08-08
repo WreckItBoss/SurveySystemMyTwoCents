@@ -123,46 +123,6 @@ export default function App() {
     }));
   }
 
-  useEffect(() => {
-    async function startSession() {
-      try {
-        setIsLoadingAssignment(true);
-        setAssignmentError("");
-
-        const response = await fetch(
-          "http://localhost:5050/api/sessions/start",
-          {
-            method: "POST",
-          },
-        );
-
-        const result = await response.json();
-
-        if (!response.ok) {
-          throw new Error(
-            result.message ||
-              "実験条件の割り当てに失敗しました。",
-          );
-        }
-
-        setAssignment(result);
-
-        console.log("Assigned condition:", result);
-      } catch (error) {
-        console.error("Assignment failed:", error);
-
-        setAssignmentError(
-          error.message ||
-            "実験条件の割り当てに失敗しました。",
-        );
-      } finally {
-        setIsLoadingAssignment(false);
-      }
-    }
-
-    startSession();
-  }, []);
-
   async function submitStudy() {
     if (isSubmitting || completionCode) {
       return;
