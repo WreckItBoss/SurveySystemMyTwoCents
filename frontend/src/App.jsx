@@ -301,6 +301,7 @@ export default function App() {
           selectedKeyword={responses.completionCheck.keyword}
           onKeywordChange={updateCompletionKeyword}
           onSubmit={submitStudy}
+          onPrevious={goPrevious}
           completionCode={completionCode}
           isSubmitting={isSubmitting}
           submitError={submitError}
