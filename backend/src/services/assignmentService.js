@@ -22,21 +22,21 @@ export async function reserveAssignment() {
     }
 
     /*
-     * Find the smallest current participant count.
+     * Find the smallest current participant count ratio wise.
      */
-    const minimumReservedCount = Math.min(
-      ...availableQuotas.map(
-        (quota) => quota.reservedCount,
-      ),
-    );
+  const minimumFillRatio = Math.min(
+    ...availableQuotas.map(
+      (quota) => quota.reservedCount / quota.target,
+    ),
+  );
 
     /*
      * Keep only the groups that currently have that minimum.
      */
-    const leastFilledQuotas = availableQuotas.filter(
-      (quota) =>
-        quota.reservedCount === minimumReservedCount,
-    );
+  const leastFilledQuotas = availableQuotas.filter(
+    (quota) =>
+      quota.reservedCount / quota.target === minimumFillRatio,
+  );
 
     /*
      * Randomly choose among equally filled groups.
