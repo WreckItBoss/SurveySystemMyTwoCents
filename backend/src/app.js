@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
 import responseRoutes from "./routes/responseRoutes.js";
+import sessionRoutes from "./routes/sessionRoutes.js";
 
 const app = express();
 
