@@ -4,7 +4,8 @@ const CORRECT_KEYWORD = "ワニ";
 
 // Temporary code used during development.
 // Later, replace this with separate correct/incorrect codes.
-const TEMPORARY_COMPLETION_CODE = "MTC8264";
+const CORRECT_COMPLETION_CODE = "5555";
+const INCORRECT_COMPLETION_CODE = "1010";
 
 export async function createResponse(req, res, next) {
   try {
