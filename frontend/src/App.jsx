@@ -50,8 +50,8 @@ export default function App() {
     sessionId: "TEMP-SESSION-001",
     topic: "nuclearenergy",
     topicLabel: "原子力発電",
-    condition: "mytwocents",
-    pattern: "P01",
+    condition: "news",
+    // pattern: "P01",
   });
 
   const [responses, setResponses] = useState(initialResponses);
