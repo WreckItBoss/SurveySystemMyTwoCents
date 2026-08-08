@@ -11,6 +11,7 @@ app.use(
   }),
 );
 
+
 app.use(express.json());
 
 app.get("/api/health", (_req, res) => {
@@ -18,5 +19,6 @@ app.get("/api/health", (_req, res) => {
 });
 
 app.use("/api/responses", responseRoutes);
+app.use("/api/sessions", sessionRoutes);
 
 export default app;
