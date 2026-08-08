@@ -1,5 +1,6 @@
 import QuestionScale from "../../components/QuestionScale/QuestionScale";
 import "./CompletionPage.css";
+import PageNavigation from "../../components/PageNavigation/PageNavigation";
 
 const keywordOptions = ["ライオン", "犬", "ワニ"];
 
@@ -60,17 +61,16 @@ export default function CompletionPage({
               </p>
             )}
 
-            <button
-              type="button"
-              className="completion-page__submit-button"
-              onClick={handleSubmit}
-              disabled={
-                !hasSelectedKeyword ||
-                isSubmitting
+            <PageNavigation
+              onPrevious={onPrevious}
+              onNext={handleSubmit}
+              nextLabel={
+                isSubmitting ? "送信中..." : "回答を送信する"
               }
-            >
-              {isSubmitting ? "送信中..." : "回答を送信する"}
-            </button>
+              nextDisabled={
+                !hasSelectedKeyword || isSubmitting
+              }
+            />
           </>
         ) : (
           <div className="completion-page__success">
