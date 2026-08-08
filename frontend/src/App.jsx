@@ -1,5 +1,3 @@
-import { useState } from "react";
-
 import ConsentPage from "./pages/ConsentPage/ConsentPage";
 import PreSurveyPage from "./pages/PreSurveyPage/PreSurveyPage";
 import ExperimentPage from "./pages/ExperimentPage/ExperimentPage";
