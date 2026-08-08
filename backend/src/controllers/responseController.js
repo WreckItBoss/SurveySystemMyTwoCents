@@ -83,6 +83,10 @@ export async function createResponse(req, res, next) {
     const keywordCorrect =
       keywordAnswer === CORRECT_KEYWORD;
 
+    const completionCode = keywordCorrect
+      ? CORRECT_COMPLETION_CODE
+      : INCORRECT_COMPLETION_CODE;
+
     const savedResponse = await Response.create({
       sessionId,
 
