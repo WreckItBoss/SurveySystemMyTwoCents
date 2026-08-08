@@ -5,6 +5,7 @@ import PreSurveyPage from "./pages/PreSurveyPage/PreSurveyPage";
 import ExperimentPage from "./pages/ExperimentPage/ExperimentPage";
 import PostSurveyPage from "./pages/PostSurveyPage/PostSurveyPage";
 import CompletionPage from "./pages/CompletionPage/CompletionPage";
+import { useEffect, useState } from "react";
 
 const PAGE_ORDER = [
   "consent",
