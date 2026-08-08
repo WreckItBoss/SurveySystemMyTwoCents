@@ -249,6 +249,18 @@ export default function App() {
     } finally {
       setIsSubmitting(false);
     }
+
+    if (isLoadingAssignment) {
+      return <p>実験を準備しています...</p>;
+    }
+
+    if (assignmentError) {
+      return <p>{assignmentError}</p>;
+    }
+
+    if (!assignment) {
+      return <p>実験条件を読み込めませんでした。</p>;
+    }
   }
 
   return (
