@@ -6,6 +6,10 @@ import ExperimentPage from "./pages/ExperimentPage/ExperimentPage";
 import PostSurveyPage from "./pages/PostSurveyPage/PostSurveyPage";
 import CompletionPage from "./pages/CompletionPage/CompletionPage";
 
+// Local: frontend/.env -> http://localhost:5050
+// Production: Vercel -> Render backend URL
+const API_URL = import.meta.env.VITE_API_URL;
+
 const PAGE_ORDER = [
   "consent",
   "preSurvey",
@@ -39,6 +43,10 @@ const initialResponses = {
 };
 
 export default function App() {
+  /*
+   * Preserve the original questionnaire start time
+   * even if the participant refreshes the page.
+   */
   const [startedAt] = useState(() => {
     const savedStartedAt =
       localStorage.getItem("mtcStartedAt");
@@ -47,7 +55,8 @@ export default function App() {
       return savedStartedAt;
     }
 
-    const newStartedAt = new Date().toISOString();
+    const newStartedAt =
+      new Date().toISOString();
 
     localStorage.setItem(
       "mtcStartedAt",
@@ -57,41 +66,79 @@ export default function App() {
     return newStartedAt;
   });
 
-  const [currentPageIndex, setCurrentPageIndex] =
-    useState(() => {
-      const savedPage =
-        localStorage.getItem("mtcCurrentPage");
+  /*
+   * Restore the page the participant was on
+   * before refreshing.
+   */
+  const [
+    currentPageIndex,
+    setCurrentPageIndex,
+  ] = useState(() => {
+    const savedPage =
+      localStorage.getItem("mtcCurrentPage");
 
-      return savedPage
-        ? Number(savedPage)
-        : 0;
-    });
+    if (savedPage === null) {
+      return 0;
+    }
+
+    const parsedPage = Number(savedPage);
+
+    if (
+      Number.isNaN(parsedPage) ||
+      parsedPage < 0 ||
+      parsedPage >= PAGE_ORDER.length
+    ) {
+      return 0;
+    }
+
+    return parsedPage;
+  });
 
   const [assignment, setAssignment] =
     useState(null);
 
-  const [assignmentError, setAssignmentError] =
-    useState("");
+  const [
+    assignmentError,
+    setAssignmentError,
+  ] = useState("");
 
-  const [isLoadingAssignment, setIsLoadingAssignment] =
-    useState(true);
+  const [
+    isLoadingAssignment,
+    setIsLoadingAssignment,
+  ] = useState(true);
 
-  const [responses, setResponses] = useState(() => {
-    const savedResponses =
-      localStorage.getItem("mtcResponses");
-
-    return savedResponses
-      ? JSON.parse(savedResponses)
-      : initialResponses;
-  });
-
-  const [completionCode, setCompletionCode] =
+  /*
+   * Restore questionnaire answers after refresh.
+   */
+  const [responses, setResponses] =
     useState(() => {
-      return (
-        localStorage.getItem("mtcCompletionCode") ||
-        ""
-      );
+      const savedResponses =
+        localStorage.getItem("mtcResponses");
+
+      if (!savedResponses) {
+        return initialResponses;
+      }
+
+      try {
+        return JSON.parse(savedResponses);
+      } catch {
+        return initialResponses;
+      }
     });
+
+  /*
+   * If they already submitted and refresh,
+   * preserve the completion code.
+   */
+  const [
+    completionCode,
+    setCompletionCode,
+  ] = useState(
+    () =>
+      localStorage.getItem(
+        "mtcCompletionCode",
+      ) || "",
+  );
 
   const [isSubmitting, setIsSubmitting] =
     useState(false);
@@ -110,19 +157,24 @@ export default function App() {
   }
 
   function goNext() {
-    setCurrentPageIndex((previousIndex) =>
-      Math.min(
-        previousIndex + 1,
-        PAGE_ORDER.length - 1,
-      ),
+    setCurrentPageIndex(
+      (previousIndex) =>
+        Math.min(
+          previousIndex + 1,
+          PAGE_ORDER.length - 1,
+        ),
     );
 
     scrollToTop();
   }
 
   function goPrevious() {
-    setCurrentPageIndex((previousIndex) =>
-      Math.max(previousIndex - 1, 0),
+    setCurrentPageIndex(
+      (previousIndex) =>
+        Math.max(
+          previousIndex - 1,
+          0,
+        ),
     );
 
     scrollToTop();
@@ -132,41 +184,55 @@ export default function App() {
     questionKey,
     value,
   ) {
-    setResponses((previousResponses) => ({
-      ...previousResponses,
+    setResponses(
+      (previousResponses) => ({
+        ...previousResponses,
 
-      preSurvey: {
-        ...previousResponses.preSurvey,
-        [questionKey]: value,
-      },
-    }));
+        preSurvey: {
+          ...previousResponses.preSurvey,
+          [questionKey]: value,
+        },
+      }),
+    );
   }
 
   function updatePostSurveyAnswer(
     questionKey,
     value,
   ) {
-    setResponses((previousResponses) => ({
-      ...previousResponses,
+    setResponses(
+      (previousResponses) => ({
+        ...previousResponses,
 
-      postSurvey: {
-        ...previousResponses.postSurvey,
-        [questionKey]: value,
-      },
-    }));
+        postSurvey: {
+          ...previousResponses.postSurvey,
+          [questionKey]: value,
+        },
+      }),
+    );
   }
 
-  function updateCompletionKeyword(value) {
-    setResponses((previousResponses) => ({
-      ...previousResponses,
+  function updateCompletionKeyword(
+    value,
+  ) {
+    setResponses(
+      (previousResponses) => ({
+        ...previousResponses,
 
-      completionCheck: {
-        ...previousResponses.completionCheck,
-        keyword: value,
-      },
-    }));
+        completionCheck: {
+          ...previousResponses.completionCheck,
+          keyword: value,
+        },
+      }),
+    );
   }
 
+  /*
+   * Get an experimental assignment.
+   *
+   * If one already exists in localStorage,
+   * reuse it instead of reserving another quota.
+   */
   useEffect(() => {
     async function startSession() {
       try {
@@ -174,24 +240,33 @@ export default function App() {
         setAssignmentError("");
 
         const savedAssignment =
-          localStorage.getItem("mtcAssignment");
-
-        if (savedAssignment) {
-          setAssignment(
-            JSON.parse(savedAssignment),
+          localStorage.getItem(
+            "mtcAssignment",
           );
 
-          return;
+        if (savedAssignment) {
+          try {
+            setAssignment(
+              JSON.parse(savedAssignment),
+            );
+
+            return;
+          } catch {
+            localStorage.removeItem(
+              "mtcAssignment",
+            );
+          }
         }
 
         const response = await fetch(
-          "http://localhost:5050/api/sessions/start",
+          `${API_URL}/api/sessions/start`,
           {
             method: "POST",
           },
         );
 
-        const result = await response.json();
+        const result =
+          await response.json();
 
         if (!response.ok) {
           throw new Error(
@@ -205,6 +280,11 @@ export default function App() {
         localStorage.setItem(
           "mtcAssignment",
           JSON.stringify(result),
+        );
+
+        console.log(
+          "Assigned condition:",
+          result,
         );
       } catch (error) {
         console.error(
@@ -224,6 +304,10 @@ export default function App() {
     startSession();
   }, []);
 
+  /*
+   * Save questionnaire answers whenever
+   * they change.
+   */
   useEffect(() => {
     localStorage.setItem(
       "mtcResponses",
@@ -231,6 +315,9 @@ export default function App() {
     );
   }, [responses]);
 
+  /*
+   * Save current questionnaire page.
+   */
   useEffect(() => {
     localStorage.setItem(
       "mtcCurrentPage",
@@ -238,6 +325,9 @@ export default function App() {
     );
   }, [currentPageIndex]);
 
+  /*
+   * Preserve completion code after submission.
+   */
   useEffect(() => {
     if (completionCode) {
       localStorage.setItem(
@@ -248,7 +338,11 @@ export default function App() {
   }, [completionCode]);
 
   async function submitStudy() {
-    if (isSubmitting || completionCode) {
+    if (
+      isSubmitting ||
+      completionCode ||
+      !assignment
+    ) {
       return;
     }
 
@@ -256,11 +350,17 @@ export default function App() {
     setSubmitError("");
 
     const submissionData = {
-      sessionId: assignment.sessionId,
+      sessionId:
+        assignment.sessionId,
 
-      topic: assignment.topic,
-      condition: assignment.condition,
-      pattern: assignment.pattern,
+      topic:
+        assignment.topic,
+
+      condition:
+        assignment.condition,
+
+      pattern:
+        assignment.pattern,
 
       ageGroup:
         responses.preSurvey.ageGroup,
@@ -272,16 +372,20 @@ export default function App() {
         responses.preSurvey.preStance,
 
       preKnowledge:
-        responses.preSurvey.topicKnowledge,
+        responses.preSurvey
+          .topicKnowledge,
 
       postUnderstanding:
-        responses.postSurvey.understanding,
+        responses.postSurvey
+          .understanding,
 
       postNewInformation:
-        responses.postSurvey.newInformation,
+        responses.postSurvey
+          .newInformation,
 
       postFurtherExploration:
-        responses.postSurvey.furtherExploration,
+        responses.postSurvey
+          .furtherExploration,
 
       chatbotAppropriateness:
         responses.postSurvey
@@ -292,7 +396,8 @@ export default function App() {
           .chatbotTrustworthiness,
 
       chatbotEngagement:
-        responses.postSurvey.chatbotEngagement,
+        responses.postSurvey
+          .chatbotEngagement,
 
       postStance:
         responses.postSurvey.postStance,
@@ -301,24 +406,36 @@ export default function App() {
         responses.postSurvey.freeComment,
 
       keywordAnswer:
-        responses.completionCheck.keyword,
+        responses.completionCheck
+          .keyword,
 
       startedAt,
     };
 
     try {
       const response = await fetch(
-        "http://localhost:5050/api/responses",
+        `${API_URL}/api/responses`,
         {
           method: "POST",
+
           headers: {
-            "Content-Type": "application/json",
+            "Content-Type":
+              "application/json",
           },
-          body: JSON.stringify(submissionData),
+
+          body: JSON.stringify(
+            submissionData,
+          ),
         },
       );
 
-      const result = await response.json();
+      const result =
+        await response.json();
+
+      console.log(
+        "Backend response:",
+        result,
+      );
 
       if (!response.ok) {
         throw new Error(
@@ -346,12 +463,24 @@ export default function App() {
     }
   }
 
+  /*
+   * Do not render the questionnaire until
+   * an assignment has been loaded.
+   */
   if (isLoadingAssignment) {
-    return <p>実験を準備しています...</p>;
+    return (
+      <p>
+        実験を準備しています...
+      </p>
+    );
   }
 
   if (assignmentError) {
-    return <p>{assignmentError}</p>;
+    return (
+      <p>
+        {assignmentError}
+      </p>
+    );
   }
 
   if (!assignment) {
@@ -372,50 +501,86 @@ export default function App() {
 
       {currentPage === "preSurvey" && (
         <PreSurveyPage
-          topic={assignment.topicLabel}
-          answers={responses.preSurvey}
+          topic={
+            assignment.topicLabel
+          }
+          answers={
+            responses.preSurvey
+          }
           onAnswerChange={
             updatePreSurveyAnswer
           }
-          onPrevious={goPrevious}
-          onNext={goNext}
+          onPrevious={
+            goPrevious
+          }
+          onNext={
+            goNext
+          }
         />
       )}
 
       {currentPage === "experiment" && (
         <ExperimentPage
-          assignment={assignment}
-          onPrevious={goPrevious}
-          onNext={goNext}
+          assignment={
+            assignment
+          }
+          onPrevious={
+            goPrevious
+          }
+          onNext={
+            goNext
+          }
         />
       )}
 
       {currentPage === "postSurvey" && (
         <PostSurveyPage
-          topic={assignment.topicLabel}
-          condition={assignment.condition}
-          answers={responses.postSurvey}
+          topic={
+            assignment.topicLabel
+          }
+          condition={
+            assignment.condition
+          }
+          answers={
+            responses.postSurvey
+          }
           onAnswerChange={
             updatePostSurveyAnswer
           }
-          onPrevious={goPrevious}
-          onSubmit={goNext}
+          onPrevious={
+            goPrevious
+          }
+          onSubmit={
+            goNext
+          }
         />
       )}
 
       {currentPage === "completion" && (
         <CompletionPage
           selectedKeyword={
-            responses.completionCheck.keyword
+            responses
+              .completionCheck
+              .keyword
           }
           onKeywordChange={
             updateCompletionKeyword
           }
-          onSubmit={submitStudy}
-          onPrevious={goPrevious}
-          completionCode={completionCode}
-          isSubmitting={isSubmitting}
-          submitError={submitError}
+          onSubmit={
+            submitStudy
+          }
+          onPrevious={
+            goPrevious
+          }
+          completionCode={
+            completionCode
+          }
+          isSubmitting={
+            isSubmitting
+          }
+          submitError={
+            submitError
+          }
         />
       )}
     </>
