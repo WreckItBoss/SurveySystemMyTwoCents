@@ -82,13 +82,13 @@ export default function MyTwoCents({topic, pattern, onPrevious, onNext}) {
               }
               title={
                 showChat
-                  ? "議論パネルを隠す"
-                  : "議論パネルを表示"
+                  ? "チャットボットを隠す"
+                  : "チャットボットを表示"
               }
             >
               {showChat
-                ? "議論パネルを隠す"
-                : "議論パネルを表示"}
+                ? "チャットボットを隠す"
+                : "チャットボットを表示"}
             </button>
           </div>
 
@@ -155,7 +155,7 @@ export default function MyTwoCents({topic, pattern, onPrevious, onNext}) {
             {showChat && (
               <section className="panel">
                 <div className="panel-header">
-                  <strong>議論パネル</strong>
+                  <strong>チャットボット</strong>
                 </div>
 
                 <div className="panel-body">
