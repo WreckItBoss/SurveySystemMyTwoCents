@@ -1,5 +1,5 @@
-import Response from "../models/Response.js";
-import AssignmentQuota from "../models/AssignmentQuota.js";
+import Response from "../Models/Response.js";
+import AssignmentQuota from "../Models/AssignmentQuota.js";
 
 const CORRECT_KEYWORD = "ワニ";
 
