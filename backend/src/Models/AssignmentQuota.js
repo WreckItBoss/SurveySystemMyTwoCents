@@ -32,7 +32,18 @@ const assignmentQuotaSchema = new mongoose.Schema(
       min: 1,
     },
 
+    // Number of participants who were assigned
+    // to this experimental condition.
     reservedCount: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
+
+    // Number of participants who actually
+    // completed and submitted the questionnaire.
+    // This is for monitoring only.
+    completedCount: {
       type: Number,
       default: 0,
       min: 0,

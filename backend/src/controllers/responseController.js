@@ -1,9 +1,8 @@
-import Response from "../Models/Response.js";
+import Response from "../models/Response.js";
+import AssignmentQuota from "../models/AssignmentQuota.js";
 
 const CORRECT_KEYWORD = "ワニ";
 
-// Temporary code used during development.
-// Later, replace this with separate correct/incorrect codes.
 const CORRECT_COMPLETION_CODE = "5555";
 const INCORRECT_COMPLETION_CODE = "1010";
 
@@ -36,10 +35,6 @@ export async function createResponse(req, res, next) {
       startedAt,
     } = req.body;
 
-    /*
-     * Basic checks before attempting to save.
-     * Mongoose will perform the detailed schema validation.
-     */
     if (!sessionId) {
       return res.status(400).json({
         message: "sessionId is required.",
@@ -71,15 +66,12 @@ export async function createResponse(req, res, next) {
     const completionTimeSeconds = Math.max(
       0,
       Math.round(
-        (completedAt.getTime() - parsedStartedAt.getTime()) /
+        (completedAt.getTime() -
+          parsedStartedAt.getTime()) /
           1000,
       ),
     );
 
-    /*
-     * A wrong answer is still valid input.
-     * We save both the original answer and whether it was correct.
-     */
     const keywordCorrect =
       keywordAnswer === CORRECT_KEYWORD;
 
@@ -87,16 +79,17 @@ export async function createResponse(req, res, next) {
       ? CORRECT_COMPLETION_CODE
       : INCORRECT_COMPLETION_CODE;
 
+    const normalizedPattern =
+      condition === "mytwocents"
+        ? pattern
+        : null;
+
     const savedResponse = await Response.create({
       sessionId,
 
       topic,
       condition,
-
-      pattern:
-        condition === "mytwocents"
-          ? pattern
-          : null,
+      pattern: normalizedPattern,
 
       ageGroup,
       gender,
@@ -136,19 +129,28 @@ export async function createResponse(req, res, next) {
     });
 
     /*
-     * Only return a code after MongoDB successfully saves
-     * the participant's response.
+     * Monitor how many participants actually completed
+     * this experimental condition.
      */
+    await AssignmentQuota.findOneAndUpdate(
+      {
+        topic,
+        condition,
+        pattern: normalizedPattern,
+      },
+      {
+        $inc: {
+          completedCount: 1,
+        },
+      },
+    );
+
     return res.status(201).json({
       saved: true,
       responseId: savedResponse._id,
       completionCode,
     });
   } catch (error) {
-    /*
-     * sessionId is unique, so submitting the same session
-     * twice creates MongoDB duplicate-key error 11000.
-     */
     if (error?.code === 11000) {
       return res.status(409).json({
         message:
@@ -156,16 +158,17 @@ export async function createResponse(req, res, next) {
       });
     }
 
-    /*
-     * Return readable Mongoose validation errors.
-     */
     if (error?.name === "ValidationError") {
       const validationErrors = Object.values(
         error.errors,
-      ).map((validationError) => validationError.message);
+      ).map(
+        (validationError) =>
+          validationError.message,
+      );
 
       return res.status(400).json({
-        message: "Submitted response data is invalid.",
+        message:
+          "Submitted response data is invalid.",
         errors: validationErrors,
       });
     }
