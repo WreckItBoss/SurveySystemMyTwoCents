@@ -1,3 +1,5 @@
+import "./QuestionScale.css";
+
 export default function QuestionScale({
   label,
   options,
@@ -9,23 +11,21 @@ export default function QuestionScale({
     <fieldset className="question-scale">
       <legend className="question-scale__question">
         {label}
-        {required && <span>*</span>}
+        {required && (
+          <span className="question-scale__required">*</span>
+        )}
       </legend>
 
       <div className="question-scale__options">
         {options.map((option) => {
           const optionValue =
-            typeof option === "object"
-              ? option.value
-              : option;
+            typeof option === "object" ? option.value : option;
 
           const optionLabel =
-            typeof option === "object"
-              ? option.label
-              : option;
+            typeof option === "object" ? option.label : option;
 
           return (
-            <label key={optionValue}>
+            <label key={optionValue} className="question-scale__option">
               <input
                 type="radio"
                 value={optionValue}
@@ -34,7 +34,9 @@ export default function QuestionScale({
                 required={required}
               />
 
-              <span>{optionLabel}</span>
+              <span className="question-scale__option-label">
+                {optionLabel}
+              </span>
             </label>
           );
         })}

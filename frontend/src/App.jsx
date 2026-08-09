@@ -1,9 +1,10 @@
+import { useEffect, useState } from "react";
+
 import ConsentPage from "./pages/ConsentPage/ConsentPage";
 import PreSurveyPage from "./pages/PreSurveyPage/PreSurveyPage";
 import ExperimentPage from "./pages/ExperimentPage/ExperimentPage";
 import PostSurveyPage from "./pages/PostSurveyPage/PostSurveyPage";
 import CompletionPage from "./pages/CompletionPage/CompletionPage";
-import { useEffect, useState } from "react";
 
 const PAGE_ORDER = [
   "consent",
@@ -38,32 +39,68 @@ const initialResponses = {
 };
 
 export default function App() {
-  const [startedAt] = useState(
-    () => new Date().toISOString(),
-  );
-  const [currentPageIndex, setCurrentPageIndex] = useState(0);
+  const [startedAt] = useState(() => {
+    const savedStartedAt =
+      localStorage.getItem("mtcStartedAt");
 
-  // Temporary hardcoded assignment.
-  // This will later come from the backend.
-  // const [assignment] = useState({
-  //   sessionId: "TEMP-SESSION-001",
-  //   topic: "nuclearenergy",
-  //   topicLabel: "原子力発電",
-  //   condition: "news",
-  //   // pattern: "P01",
-  // });
+    if (savedStartedAt) {
+      return savedStartedAt;
+    }
 
-  const [assignment, setAssignment] = useState(null);
-  const [assignmentError, setAssignmentError] = useState("");
-  const [isLoadingAssignment, setIsLoadingAssignment] = useState(true);
+    const newStartedAt = new Date().toISOString();
 
-  const [responses, setResponses] = useState(initialResponses);
+    localStorage.setItem(
+      "mtcStartedAt",
+      newStartedAt,
+    );
 
-  const [completionCode, setCompletionCode] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitError, setSubmitError] = useState("");
+    return newStartedAt;
+  });
 
-  const currentPage = PAGE_ORDER[currentPageIndex];
+  const [currentPageIndex, setCurrentPageIndex] =
+    useState(() => {
+      const savedPage =
+        localStorage.getItem("mtcCurrentPage");
+
+      return savedPage
+        ? Number(savedPage)
+        : 0;
+    });
+
+  const [assignment, setAssignment] =
+    useState(null);
+
+  const [assignmentError, setAssignmentError] =
+    useState("");
+
+  const [isLoadingAssignment, setIsLoadingAssignment] =
+    useState(true);
+
+  const [responses, setResponses] = useState(() => {
+    const savedResponses =
+      localStorage.getItem("mtcResponses");
+
+    return savedResponses
+      ? JSON.parse(savedResponses)
+      : initialResponses;
+  });
+
+  const [completionCode, setCompletionCode] =
+    useState(() => {
+      return (
+        localStorage.getItem("mtcCompletionCode") ||
+        ""
+      );
+    });
+
+  const [isSubmitting, setIsSubmitting] =
+    useState(false);
+
+  const [submitError, setSubmitError] =
+    useState("");
+
+  const currentPage =
+    PAGE_ORDER[currentPageIndex];
 
   function scrollToTop() {
     window.scrollTo({
@@ -74,7 +111,10 @@ export default function App() {
 
   function goNext() {
     setCurrentPageIndex((previousIndex) =>
-      Math.min(previousIndex + 1, PAGE_ORDER.length - 1),
+      Math.min(
+        previousIndex + 1,
+        PAGE_ORDER.length - 1,
+      ),
     );
 
     scrollToTop();
@@ -88,7 +128,10 @@ export default function App() {
     scrollToTop();
   }
 
-  function updatePreSurveyAnswer(questionKey, value) {
+  function updatePreSurveyAnswer(
+    questionKey,
+    value,
+  ) {
     setResponses((previousResponses) => ({
       ...previousResponses,
 
@@ -99,7 +142,10 @@ export default function App() {
     }));
   }
 
-  function updatePostSurveyAnswer(questionKey, value) {
+  function updatePostSurveyAnswer(
+    questionKey,
+    value,
+  ) {
     setResponses((previousResponses) => ({
       ...previousResponses,
 
@@ -127,6 +173,17 @@ export default function App() {
         setIsLoadingAssignment(true);
         setAssignmentError("");
 
+        const savedAssignment =
+          localStorage.getItem("mtcAssignment");
+
+        if (savedAssignment) {
+          setAssignment(
+            JSON.parse(savedAssignment),
+          );
+
+          return;
+        }
+
         const response = await fetch(
           "http://localhost:5050/api/sessions/start",
           {
@@ -145,9 +202,15 @@ export default function App() {
 
         setAssignment(result);
 
-        console.log("Assigned condition:", result);
+        localStorage.setItem(
+          "mtcAssignment",
+          JSON.stringify(result),
+        );
       } catch (error) {
-        console.error("Assignment failed:", error);
+        console.error(
+          "Assignment failed:",
+          error,
+        );
 
         setAssignmentError(
           error.message ||
@@ -160,6 +223,29 @@ export default function App() {
 
     startSession();
   }, []);
+
+  useEffect(() => {
+    localStorage.setItem(
+      "mtcResponses",
+      JSON.stringify(responses),
+    );
+  }, [responses]);
+
+  useEffect(() => {
+    localStorage.setItem(
+      "mtcCurrentPage",
+      String(currentPageIndex),
+    );
+  }, [currentPageIndex]);
+
+  useEffect(() => {
+    if (completionCode) {
+      localStorage.setItem(
+        "mtcCompletionCode",
+        completionCode,
+      );
+    }
+  }, [completionCode]);
 
   async function submitStudy() {
     if (isSubmitting || completionCode) {
@@ -176,10 +262,15 @@ export default function App() {
       condition: assignment.condition,
       pattern: assignment.pattern,
 
-      ageGroup: responses.preSurvey.ageGroup,
-      gender: responses.preSurvey.gender,
+      ageGroup:
+        responses.preSurvey.ageGroup,
 
-      preStance: responses.preSurvey.preStance,
+      gender:
+        responses.preSurvey.gender,
+
+      preStance:
+        responses.preSurvey.preStance,
+
       preKnowledge:
         responses.preSurvey.topicKnowledge,
 
@@ -193,10 +284,12 @@ export default function App() {
         responses.postSurvey.furtherExploration,
 
       chatbotAppropriateness:
-        responses.postSurvey.chatbotAppropriateness,
+        responses.postSurvey
+          .chatbotAppropriateness,
 
       chatbotTrustworthiness:
-        responses.postSurvey.chatbotTrustworthiness,
+        responses.postSurvey
+          .chatbotTrustworthiness,
 
       chatbotEngagement:
         responses.postSurvey.chatbotEngagement,
@@ -226,19 +319,23 @@ export default function App() {
       );
 
       const result = await response.json();
-      console.log("Backend response:", result);
 
       if (!response.ok) {
         throw new Error(
           result.errors?.join(", ") ||
-          result.message ||
-          "回答の保存に失敗しました。",
+            result.message ||
+            "回答の保存に失敗しました。",
         );
       }
 
-      setCompletionCode(result.completionCode);
+      setCompletionCode(
+        result.completionCode,
+      );
     } catch (error) {
-      console.error("Submission failed:", error);
+      console.error(
+        "Submission failed:",
+        error,
+      );
 
       setSubmitError(
         error.message ||
@@ -247,31 +344,39 @@ export default function App() {
     } finally {
       setIsSubmitting(false);
     }
+  }
 
-    if (isLoadingAssignment) {
-      return <p>実験を準備しています...</p>;
-    }
+  if (isLoadingAssignment) {
+    return <p>実験を準備しています...</p>;
+  }
 
-    if (assignmentError) {
-      return <p>{assignmentError}</p>;
-    }
+  if (assignmentError) {
+    return <p>{assignmentError}</p>;
+  }
 
-    if (!assignment) {
-      return <p>実験条件を読み込めませんでした。</p>;
-    }
+  if (!assignment) {
+    return (
+      <p>
+        実験条件を読み込めませんでした。
+      </p>
+    );
   }
 
   return (
     <>
       {currentPage === "consent" && (
-        <ConsentPage onNext={goNext} />
+        <ConsentPage
+          onNext={goNext}
+        />
       )}
 
       {currentPage === "preSurvey" && (
         <PreSurveyPage
           topic={assignment.topicLabel}
           answers={responses.preSurvey}
-          onAnswerChange={updatePreSurveyAnswer}
+          onAnswerChange={
+            updatePreSurveyAnswer
+          }
           onPrevious={goPrevious}
           onNext={goNext}
         />
@@ -290,7 +395,9 @@ export default function App() {
           topic={assignment.topicLabel}
           condition={assignment.condition}
           answers={responses.postSurvey}
-          onAnswerChange={updatePostSurveyAnswer}
+          onAnswerChange={
+            updatePostSurveyAnswer
+          }
           onPrevious={goPrevious}
           onSubmit={goNext}
         />
@@ -298,8 +405,12 @@ export default function App() {
 
       {currentPage === "completion" && (
         <CompletionPage
-          selectedKeyword={responses.completionCheck.keyword}
-          onKeywordChange={updateCompletionKeyword}
+          selectedKeyword={
+            responses.completionCheck.keyword
+          }
+          onKeywordChange={
+            updateCompletionKeyword
+          }
           onSubmit={submitStudy}
           onPrevious={goPrevious}
           completionCode={completionCode}

@@ -2,33 +2,34 @@
   width: 100%;
   min-height: 100vh;
   padding: 48px 20px;
-  background: #f4f6f8;
+  background: var(--paper);
 }
 
 .consent-card {
-  width: min(820px, 100%);
+  width: min(760px, 100%);
   margin: 0 auto;
   padding: 40px;
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
-  border-radius: 16px;
-  box-shadow: 0 12px 32px rgba(15, 23, 42, 0.08);
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
 }
 
 .consent-header {
   padding-bottom: 24px;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid var(--line);
 }
 
 .consent-header h1 {
   margin: 6px 0 0;
-  font-size: 2rem;
+  color: var(--ink);
+  font-size: 1.8rem;
   line-height: 1.4;
 }
 
 .consent-eyebrow {
   margin: 0;
-  color: #64748b;
+  color: var(--accent);
   font-size: 0.9rem;
   font-weight: 700;
   letter-spacing: 0.04em;
@@ -47,33 +48,53 @@
 
 .consent-content h2 {
   margin: 0;
+  color: var(--ink);
   font-size: 1.15rem;
 }
 
 .consent-content p {
   margin: 0;
-  color: #475569;
+  color: var(--ink-soft);
   line-height: 1.8;
 }
 
 .consent-checkbox {
   display: flex;
-  gap: 12px;
+  gap: 14px;
   align-items: flex-start;
-  padding: 18px;
-  background: #f8fafc;
-  border: 1px solid #cbd5e1;
-  border-radius: 10px;
+  padding: 20px;
+  background: var(--paper);
+  border: 2px solid var(--line);
+  border-radius: var(--radius-md);
   cursor: pointer;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.consent-checkbox:hover {
+  border-color: var(--accent);
+  background: var(--accent-tint);
+}
+
+.consent-checkbox:has(input:checked) {
+  border-color: var(--accent);
+  background: var(--accent-tint);
+}
+
+.consent-checkbox:has(input:focus-visible) {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
 }
 
 .consent-checkbox input {
-  width: 18px;
-  height: 18px;
-  margin-top: 3px;
+  width: 22px;
+  height: 22px;
+  margin-top: 2px;
+  flex-shrink: 0;
+  accent-color: var(--accent);
 }
 
 .consent-checkbox span {
+  color: var(--ink);
   line-height: 1.7;
 }
 
@@ -84,7 +105,6 @@
 
   .consent-card {
     padding: 24px 20px;
-    border-radius: 12px;
   }
 
   .consent-header h1 {

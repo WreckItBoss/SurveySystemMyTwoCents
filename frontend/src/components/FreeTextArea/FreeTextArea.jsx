@@ -2,7 +2,7 @@ import "./FreeTextArea.css";
 
 export default function FreeTextArea({
     id,
-    question,
+    label,
     value,
     onChange,
     placeholder = "",
@@ -14,9 +14,12 @@ export default function FreeTextArea({
         onChange(event.target.value);
     }
     return(
-        <div className = "free-text-area">
-            <label className = "free-text-area__label" htmlFor={id}>
-                {question}
+        <div className="free-text-area">
+            <label className="free-text-area__label" htmlFor={id}>
+                {label}
+                {required && (
+                    <span className="free-text-area__required">*</span>
+                )}
             </label>
             <textarea
                 id={id}

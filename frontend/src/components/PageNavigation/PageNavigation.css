@@ -5,30 +5,52 @@
   gap: 16px;
   margin-top: 32px;
   padding-top: 24px;
-  border-top: 1px solid #e5e7eb;
+  border-top: 1px solid var(--line);
 }
 
 .page-navigation__button {
-  min-width: 110px;
-  padding: 10px 20px;
-  border-radius: 8px;
+  min-width: 120px;
+  padding: 12px 24px;
+  border-radius: 999px;
   font: inherit;
+  font-weight: 600;
   cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease,
+    background-color 0.15s ease, border-color 0.15s ease;
 }
 
 .page-navigation__button--primary {
-  border: 1px solid #1f2937;
-  background: #1f2937;
-  color: white;
+  border: 2px solid var(--accent);
+  background: var(--accent);
+  color: #fff;
+}
+
+.page-navigation__button--primary:hover:not(:disabled) {
+  background: var(--accent-deep);
+  border-color: var(--accent-deep);
+  transform: translateY(-1px);
+  box-shadow: 0 8px 16px rgba(183, 93, 107, 0.25);
 }
 
 .page-navigation__button--secondary {
-  border: 1px solid #cbd5e1;
-  background: white;
-  color: #1f2937;
+  border: 2px solid var(--line);
+  background: var(--card);
+  color: var(--ink);
+}
+
+.page-navigation__button--secondary:hover:not(:disabled) {
+  border-color: var(--ink-soft);
+  background: var(--paper);
+}
+
+.page-navigation__button:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
 }
 
 .page-navigation__button:disabled {
   cursor: not-allowed;
-  opacity: 0.5;
+  opacity: 0.45;
+  transform: none;
+  box-shadow: none;
 }

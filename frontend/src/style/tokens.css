@@ -1,0 +1,17 @@
+:root {
+  --paper: #FAF6F0;
+  --card: #FFFFFF;
+  --ink: #3A332C;
+  --ink-soft: #8A7F74;
+  --line: #EAE1D4;
+  --accent: #B75D6B;
+  --accent-deep: #9A4756;
+  --accent-tint: #F6E9EB;
+  --focus-ring: #B75D6B;
+
+  --radius-lg: 20px;
+  --radius-md: 12px;
+  --radius-sm: 8px;
+
+  --shadow-card: 0 12px 28px rgba(58, 51, 44, 0.08);
+}
