@@ -1,4 +1,4 @@
-import Response from "../models/Response.js";
+import Response from "../Models/Response.js";
 
 const CORRECT_KEYWORD = "ワニ";
 
