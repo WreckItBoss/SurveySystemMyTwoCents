@@ -1,4 +1,4 @@
-import AssignmentQuota from "../models/AssignmentQuota.js";
+import AssignmentQuota from "../Models/AssignmentQuota.js";
 
 function selectRandom(items) {
   const randomIndex = Math.floor(Math.random() * items.length);
