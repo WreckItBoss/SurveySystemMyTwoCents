@@ -412,43 +412,63 @@ export default function App() {
       startedAt,
     };
 
-    try {
-      const response = await fetch(
-        `${API_URL}/api/responses`,
-        {
-          method: "POST",
+  try {
+    const response = await fetch(
+      `${API_URL}/api/responses`,
+      {
+        method: "POST",
 
-          headers: {
-            "Content-Type":
-              "application/json",
-          },
-
-          body: JSON.stringify(
-            submissionData,
-          ),
+        headers: {
+          "Content-Type": "application/json",
         },
+
+        body: JSON.stringify(submissionData),
+      },
+    );
+
+    // Read the raw response first so an empty
+    // backend response doesn't crash response.json().
+    const responseText = await response.text();
+
+    console.log(
+      "Response status:",
+      response.status,
+    );
+
+    console.log(
+      "Raw backend response:",
+      responseText,
+    );
+
+    let result = {};
+
+    if (responseText) {
+      result = JSON.parse(responseText);
+    }
+
+    console.log(
+      "Backend response:",
+      result,
+    );
+
+    if (!response.ok) {
+      throw new Error(
+        result.errors?.join(", ") ||
+          result.message ||
+          `回答の保存に失敗しました。 (${response.status})`,
       );
+    }
 
-      const result =
-        await response.json();
-
-      console.log(
-        "Backend response:",
-        result,
+    if (!result.completionCode) {
+      throw new Error(
+        "回答は送信されましたが、完了コードを取得できませんでした。",
       );
+    }
 
-      if (!response.ok) {
-        throw new Error(
-          result.errors?.join(", ") ||
-            result.message ||
-            "回答の保存に失敗しました。",
-        );
-      }
-
-      setCompletionCode(
-        result.completionCode,
-      );
-    } catch (error) {
+    setCompletionCode(
+      result.completionCode,
+    );
+  } catch (error) {
       console.error(
         "Submission failed:",
         error,
