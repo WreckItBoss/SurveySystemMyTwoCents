@@ -17,7 +17,7 @@ for (const topic of topics) {
     topic,
     condition: "news",
     pattern: null,
-    target: 250,
+    target: 25,
     reservedCount: 0,
   });
 
@@ -26,7 +26,7 @@ for (const topic of topics) {
       topic,
       condition: "mytwocents",
       pattern: `P0${patternNumber}`,
-      target: 50,
+      target: 5,
       reservedCount: 0,
     });
   }
