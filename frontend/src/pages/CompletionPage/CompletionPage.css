@@ -29,7 +29,7 @@
 
 .completion-page__header p {
   margin: 0;
-  color: var(--ink-soft);
+  color: rgb(76, 88, 100);
   line-height: 1.8;
 }
 
@@ -68,7 +68,7 @@
 }
 
 .completion-page__success p {
-  color: var(--ink-soft);
+  color: rgb(76, 88, 100);
   line-height: 1.8;
 }
 
@@ -86,7 +86,7 @@
 }
 
 .completion-page__warning {
-  color: var(--ink-soft);
+  color: rgb(76, 88, 100);
   font-size: 0.9rem;
 }
 
