@@ -54,7 +54,7 @@
 
 .consent-content p {
   margin: 0;
-  color: var(--ink-soft);
+  color: rgb(76, 88, 100);
   line-height: 1.8;
 }
 
