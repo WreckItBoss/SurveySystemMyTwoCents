@@ -62,7 +62,7 @@ export default function createPostSurveyQuestions(topic, condition) {
       label:
         "チャットボットの会話は、最後まで興味を持って読むことができましたか。",
       options: agreementOptions,
-    },
+    }
   ];
 
   const finalQuestions = [
@@ -79,6 +79,13 @@ export default function createPostSurveyQuestions(topic, condition) {
     ...finalQuestions,
   ];
 }
+
+export const systemCommentQuestion = {
+  key: "systemComment",
+  label:
+    "今回利用した、ニュース記事とAIエージェントによる議論を表示するシステムについて、使いやすさ、読みやすさ、議論の内容、良かった点・改善してほしい点など、感じたことがあれば自由にご記入ください。",
+  placeholder: "こちらにご記入ください。",
+};
 
 export const freeCommentQuestion = {
   key: "freeComment",
