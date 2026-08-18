@@ -70,6 +70,14 @@
   transition: border-color 0.15s ease, background-color 0.15s ease;
 }
 
+.consent-error {
+  margin-top: 1.5rem;
+  padding: 1rem;
+  border-radius: 8px;
+  background: #fff3f3;
+  color: #b42318;
+  font-weight: 600;
+}
 .consent-checkbox:hover {
   border-color: var(--accent);
   background: var(--accent-tint);
