@@ -34,6 +34,7 @@ export async function createResponse(req, res, next) {
       chatbotEngagement,
 
       postStance,
+      systemComment,
       freeComment,
 
       keywordAnswer,
@@ -122,6 +123,11 @@ export async function createResponse(req, res, next) {
           : null,
 
       postStance,
+
+      systemComment:
+        condition === "mytwocents"
+          ? systemComment ?? ""
+          : "",
 
       freeComment: freeComment ?? "",
 
