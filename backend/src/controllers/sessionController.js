@@ -1,4 +1,5 @@
 import crypto from "node:crypto";
+import Session from "../models/Session.js";
 import { reserveAssignment } from "../services/assignmentService.js";
 
 const topicLabels = {
@@ -13,12 +14,29 @@ export async function startSession(req, res, next) {
 
     const sessionId = crypto.randomUUID();
 
+    const now = new Date();
+
+    const expiresAt = new Date(
+      now.getTime() + 40 * 60 * 1000,
+    );
+
+    await Session.create({
+      sessionId,
+      topic: assignment.topic,
+      condition: assignment.condition,
+      pattern: assignment.pattern,
+      status: "active",
+      startedAt: now,
+      expiresAt,
+    });
+
     return res.status(201).json({
       sessionId,
       topic: assignment.topic,
       topicLabel: topicLabels[assignment.topic],
       condition: assignment.condition,
       pattern: assignment.pattern,
+      expiresAt,
     });
   } catch (error) {
     if (error.message === "NO_ASSIGNMENTS_AVAILABLE") {
