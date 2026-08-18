@@ -130,29 +130,34 @@ export async function createResponse(req, res, next) {
     });
 
     /*
-     * Mark the session as completed so it will
-     * no longer be treated as an active session
-     * by the timeout cleanup logic.
+     * Mark the session as completed.
+     *
+     * Only an active session can transition to
+     * completed_correct or completed_incorrect.
      */
-    await Session.findOneAndUpdate(
-      {
-        sessionId,
-        status: "active",
-      },
-      {
-        $set: {
-          status: keywordCorrect
-            ? "completed_correct"
-            : "completed_incorrect",
-
-          completedAt,
+    const completedSession =
+      await Session.findOneAndUpdate(
+        {
+          sessionId,
+          status: "active",
         },
-      },
-    );
+        {
+          $set: {
+            status: keywordCorrect
+              ? "completed_correct"
+              : "completed_incorrect",
+
+            completedAt,
+          },
+        },
+        {
+          new: true,
+        },
+      );
 
     /*
-     * Monitor how many participants actually
-     * completed this experimental condition.
+     * Count every participant who actually submitted,
+     * regardless of whether the final check was correct.
      */
     await AssignmentQuota.findOneAndUpdate(
       {
@@ -166,6 +171,35 @@ export async function createResponse(req, res, next) {
         },
       },
     );
+
+    /*
+     * If the participant failed the final check,
+     * release the reserved quota slot.
+     *
+     * Their Response is still stored, but they no longer
+     * count toward the target.
+     *
+     * completedSession must exist so we only release
+     * the reservation once.
+     */
+    if (!keywordCorrect && completedSession) {
+      await AssignmentQuota.findOneAndUpdate(
+        {
+          topic,
+          condition,
+          pattern: normalizedPattern,
+
+          reservedCount: {
+            $gt: 0,
+          },
+        },
+        {
+          $inc: {
+            reservedCount: -1,
+          },
+        },
+      );
+    }
 
     return res.status(201).json({
       saved: true,
