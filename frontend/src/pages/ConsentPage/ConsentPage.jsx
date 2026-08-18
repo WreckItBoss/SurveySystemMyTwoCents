@@ -96,8 +96,6 @@ export default function ConsentPage({
             </p>
 
             <ul>
-              <li>18歳以上の方</li>
-
               <li>
                 日本語の文章を読むことができる方
               </li>
