@@ -106,6 +106,15 @@
   line-height: 1.7;
 }
 
+  .consent-timeout-message {
+  margin-top: 1.5rem;
+  padding: 1rem;
+  border-radius: 8px;
+  background: #fff8e6;
+  color: #f20808;
+  font-weight: 600;
+}
+
 @media (max-width: 640px) {
   .consent-page {
     padding: 20px 12px;
@@ -117,13 +126,5 @@
 
   .consent-header h1 {
     font-size: 1.55rem;
-  }
-  .consent-timeout-message {
-  margin-top: 1.5rem;
-  padding: 1rem;
-  border-radius: 8px;
-  background: #fff8e6;
-  color: #f20808;
-  font-weight: 600;
   }
 }
