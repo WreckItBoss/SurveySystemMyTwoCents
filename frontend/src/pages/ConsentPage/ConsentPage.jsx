@@ -2,8 +2,13 @@ import { useState } from "react";
 import PageNavigation from "../../components/PageNavigation/PageNavigation";
 import "./ConsentPage.css";
 
-export default function ConsentPage({ onNext }) {
-  const [hasConsented, setHasConsented] = useState(false);
+export default function ConsentPage({
+  onNext,
+  isLoading = false,
+  assignmentError = "",
+}) {
+  const [hasConsented, setHasConsented] =
+    useState(false);
 
   return (
     <main className="consent-page">
@@ -43,21 +48,27 @@ export default function ConsentPage({ onNext }) {
               <li>
                 研究およびタスク内容の説明を読み、参加に同意する
               </li>
+
               <li>
                 ご自身や対象となる話題についての事前アンケートに回答する
               </li>
+
               <li>
                 表示されたニュース記事などのコンテンツをよく読む
               </li>
+
               <li>
                 内容やご自身の意見についての事後アンケートに回答する
               </li>
+
               <li>
                 内容に関する確認問題に回答する
               </li>
+
               <li>
                 画面に表示された回答完了コードを確認する
               </li>
+
               <li>
                 Yahoo!クラウドソーシングの回答画面に戻り、
                 表示された回答完了コードを選択して回答を送信する
@@ -85,10 +96,15 @@ export default function ConsentPage({ onNext }) {
 
             <ul>
               <li>18歳以上の方</li>
-              <li>日本語の文章を読むことができる方</li>
+
+              <li>
+                日本語の文章を読むことができる方
+              </li>
+
               <li>
                 パソコンまたはスマートフォンからタスクに参加できる方
               </li>
+
               <li>
                 説明およびニュース記事などの内容をよく読み、
                 ご自身で回答できる方
@@ -109,19 +125,24 @@ export default function ConsentPage({ onNext }) {
                 表示される説明やニュース記事などをよく読んだうえで
                 回答してください。
               </li>
+
               <li>
                 他のウェブサイトや生成AIなどを使用せず、
                 ご自身の判断で回答してください。
               </li>
+
               <li>
                 回答中は、ブラウザの「戻る」ボタンを使用しないでください。
               </li>
+
               <li>
                 通信環境が安定した場所で回答してください。
               </li>
+
               <li>
                 タスクへの参加は、原則として1人1回のみです。
               </li>
+
               <li>
                 タスクの内容や確認問題の答え、回答完了コードなどを
                 第三者に共有しないでください。
@@ -167,22 +188,28 @@ export default function ConsentPage({ onNext }) {
               <li>
                 タスクが最後まで完了していない場合
               </li>
+
               <li>
                 正しい回答完了コードが選択されていない場合
               </li>
+
               <li>
                 同一人物による複数回の回答が確認された場合
               </li>
+
               <li>
                 説明やニュース記事などを十分に読まずに
                 回答したと考えられる場合
               </li>
+
               <li>
                 極端に短い時間で回答している場合
               </li>
+
               <li>
                 回答内容に明らかな矛盾や不自然な回答が多数含まれる場合
               </li>
+
               <li>
                 不正な方法や自動化ツールを使用して回答した場合
               </li>
@@ -226,13 +253,25 @@ export default function ConsentPage({ onNext }) {
             </p>
           </section>
 
+          {assignmentError && (
+            <p
+              className="consent-error"
+              role="alert"
+            >
+              {assignmentError}
+            </p>
+          )}
+
           <label className="consent-checkbox">
             <input
               type="checkbox"
               checked={hasConsented}
               onChange={(event) =>
-                setHasConsented(event.target.checked)
+                setHasConsented(
+                  event.target.checked,
+                )
               }
+              disabled={isLoading}
             />
 
             <span>
@@ -244,8 +283,16 @@ export default function ConsentPage({ onNext }) {
 
         <PageNavigation
           onNext={onNext}
-          nextDisabled={!hasConsented}
-          nextLabel="同意して次へ"
+          nextDisabled={
+            !hasConsented ||
+            isLoading ||
+            Boolean(assignmentError)
+          }
+          nextLabel={
+            isLoading
+              ? "確認中..."
+              : "同意して次へ"
+          }
         />
       </section>
     </main>
