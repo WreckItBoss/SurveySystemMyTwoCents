@@ -6,6 +6,7 @@ export default function ConsentPage({
   onNext,
   isLoading = false,
   assignmentError = "",
+  timeoutMessage = "",
 }) {
   const [hasConsented, setHasConsented] =
     useState(false);
@@ -252,7 +253,14 @@ export default function ConsentPage({
               お問い合わせ先：research.naist.s2026@gmail.com
             </p>
           </section>
-
+          {timeoutMessage && (
+            <p
+              className="consent-timeout-message"
+              role="status"
+            >
+              {timeoutMessage}
+            </p>
+          )}
           {assignmentError && (
             <p
               className="consent-error"

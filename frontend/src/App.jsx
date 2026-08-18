@@ -41,11 +41,11 @@ const initialResponses = {
 };
 
 export default function App() {
+  const [timeoutMessage, setTimeoutMessage] =
+    useState("");
+
   /*
-   * Restore an existing assignment after refresh.
-   *
-   * IMPORTANT:
-   * We do NOT create a new assignment here anymore.
+   * Restore existing assignment after refresh.
    */
   const [assignment, setAssignment] = useState(() => {
     const savedAssignment =
@@ -218,11 +218,8 @@ export default function App() {
   }
 
   /*
-   * Called ONLY after the participant clicks
-   * "同意して次へ".
-   *
-   * This is now the moment when the participant
-   * receives an experimental assignment.
+   * Create an assignment only after
+   * the participant clicks "同意して次へ".
    */
   async function handleConsentNext() {
     if (isLoadingAssignment) {
@@ -230,9 +227,14 @@ export default function App() {
     }
 
     /*
-     * If an assignment already exists, such as
-     * after returning to the consent page,
-     * do not reserve another slot.
+     * Remove an old timeout message when
+     * the participant tries to join again.
+     */
+    setTimeoutMessage("");
+
+    /*
+     * If an assignment already exists,
+     * do not create another reservation.
      */
     if (assignment) {
       goNext();
@@ -260,7 +262,7 @@ export default function App() {
       }
 
       /*
-       * No experimental slots remain.
+       * All available experimental cells are full.
        */
       if (response.status === 409) {
         setAssignmentError(
@@ -278,7 +280,7 @@ export default function App() {
       }
 
       /*
-       * Save the assignment.
+       * Save assignment.
        */
       setAssignment(result);
 
@@ -288,8 +290,8 @@ export default function App() {
       );
 
       /*
-       * Questionnaire timing starts when the
-       * participant is actually assigned.
+       * Questionnaire timing begins when
+       * the assignment is created.
        */
       const newStartedAt =
         new Date().toISOString();
@@ -306,10 +308,6 @@ export default function App() {
         result,
       );
 
-      /*
-       * Assignment succeeded.
-       * Move to PreSurvey.
-       */
       goNext();
     } catch (error) {
       console.error(
@@ -359,10 +357,8 @@ export default function App() {
   }, [completionCode]);
 
   /*
-   * Safety:
-   *
-   * If there is no assignment but localStorage
-   * says the participant was on a later page,
+   * If there is no assignment but the browser
+   * thinks the participant was on a later page,
    * return them to Consent.
    */
   useEffect(() => {
@@ -373,6 +369,112 @@ export default function App() {
       setCurrentPageIndex(0);
     }
   }, [assignment, currentPageIndex]);
+
+  /*
+   * SESSION TIMEOUT
+   *
+   * The backend provides expiresAt when the
+   * session is created.
+   *
+   * Once the expiration time is reached:
+   * - clear the assignment
+   * - clear questionnaire answers
+   * - clear localStorage
+   * - return to Consent
+   * - show a timeout message
+   */
+  useEffect(() => {
+    if (
+      !assignment?.expiresAt ||
+      completionCode
+    ) {
+      return;
+    }
+
+    const expiresAtTime =
+      new Date(
+        assignment.expiresAt,
+      ).getTime();
+
+    if (Number.isNaN(expiresAtTime)) {
+      console.error(
+        "Invalid session expiration time:",
+        assignment.expiresAt,
+      );
+
+      return;
+    }
+
+    function handleSessionTimeout() {
+      /*
+       * Reset React state.
+       */
+      setAssignment(null);
+      setResponses(initialResponses);
+      setCurrentPageIndex(0);
+      setStartedAt("");
+      setCompletionCode("");
+      setSubmitError("");
+      setAssignmentError("");
+
+      /*
+       * Inform participant.
+       */
+      setTimeoutMessage(
+        "回答時間の上限（40分）を超えたため、セッションが終了しました。参加を希望される場合は、再度内容をご確認のうえ「同意して次へ」を押してください。",
+      );
+
+      /*
+       * Clear old local session.
+       */
+      localStorage.removeItem(
+        "mtcAssignment",
+      );
+
+      localStorage.removeItem(
+        "mtcResponses",
+      );
+
+      localStorage.removeItem(
+        "mtcCurrentPage",
+      );
+
+      localStorage.removeItem(
+        "mtcStartedAt",
+      );
+
+      localStorage.removeItem(
+        "mtcCompletionCode",
+      );
+
+      window.scrollTo({
+        top: 0,
+        behavior: "smooth",
+      });
+    }
+
+    const remainingTime =
+      expiresAtTime - Date.now();
+
+    /*
+     * Also handles reopening the website
+     * after the session already expired.
+     */
+    if (remainingTime <= 0) {
+      handleSessionTimeout();
+      return;
+    }
+
+    const timeoutId =
+      window.setTimeout(
+        handleSessionTimeout,
+        remainingTime,
+      );
+
+    return () => {
+      window.clearTimeout(timeoutId);
+    };
+  }, [assignment, completionCode]);
 
   async function submitStudy() {
     if (
@@ -522,6 +624,7 @@ export default function App() {
           onNext={handleConsentNext}
           isLoading={isLoadingAssignment}
           assignmentError={assignmentError}
+          timeoutMessage={timeoutMessage}
         />
       )}
 
@@ -549,15 +652,9 @@ export default function App() {
       {currentPage === "experiment" &&
         assignment && (
           <ExperimentPage
-            assignment={
-              assignment
-            }
-            onPrevious={
-              goPrevious
-            }
-            onNext={
-              goNext
-            }
+            assignment={assignment}
+            onPrevious={goPrevious}
+            onNext={goNext}
           />
         )}
 
