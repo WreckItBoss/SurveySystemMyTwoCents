@@ -27,6 +27,7 @@ export async function createResponse(req, res, next) {
 
       postUnderstanding,
       postNewInformation,
+      postPerspectiveComparison,
       postFurtherExploration,
 
       chatbotAppropriateness,
@@ -105,6 +106,7 @@ export async function createResponse(req, res, next) {
 
       postUnderstanding,
       postNewInformation,
+      postPerspectiveComparison,
       postFurtherExploration,
 
       chatbotAppropriateness:
