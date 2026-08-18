@@ -5,8 +5,11 @@ import "dotenv/config";
 
 const CORRECT_KEYWORD = "ワニ";
 
-const CORRECT_COMPLETION_CODE =  process.env.CORRECT_COMPLETION_CODE;
-const INCORRECT_COMPLETION_CODE = process.env.INCORRECT_COMPLETION_CODE;
+const CORRECT_COMPLETION_CODE =
+  process.env.CORRECT_COMPLETION_CODE;
+
+const INCORRECT_COMPLETION_CODE =
+  process.env.INCORRECT_COMPLETION_CODE;
 
 export async function createResponse(req, res, next) {
   try {
@@ -131,10 +134,8 @@ export async function createResponse(req, res, next) {
     });
 
     /*
-     * Mark the session as completed.
-     *
-     * Only an active session can transition to
-     * completed_correct or completed_incorrect.
+     * Only an active session can transition
+     * into a completed state.
      */
     const completedSession =
       await Session.findOneAndUpdate(
@@ -157,49 +158,52 @@ export async function createResponse(req, res, next) {
       );
 
     /*
-     * Count every participant who actually submitted,
-     * regardless of whether the final check was correct.
+     * Update quota statistics only if this
+     * session successfully transitioned from
+     * active to a completed state.
      */
-    await AssignmentQuota.findOneAndUpdate(
-      {
-        topic,
-        condition,
-        pattern: normalizedPattern,
-      },
-      {
-        $inc: {
-          completedCount: 1,
-        },
-      },
-    );
-
-    /*
-     * If the participant failed the final check,
-     * release the reserved quota slot.
-     *
-     * Their Response is still stored, but they no longer
-     * count toward the target.
-     *
-     * completedSession must exist so we only release
-     * the reservation once.
-     */
-    if (!keywordCorrect && completedSession) {
-      await AssignmentQuota.findOneAndUpdate(
-        {
-          topic,
-          condition,
-          pattern: normalizedPattern,
-
-          reservedCount: {
-            $gt: 0,
+    if (completedSession) {
+      if (keywordCorrect) {
+        /*
+         * Correct submission:
+         * count as a valid completed participant.
+         */
+        await AssignmentQuota.findOneAndUpdate(
+          {
+            topic,
+            condition,
+            pattern: normalizedPattern,
           },
-        },
-        {
-          $inc: {
-            reservedCount: -1,
+          {
+            $inc: {
+              completedCount: 1,
+            },
           },
-        },
-      );
+        );
+      } else {
+        /*
+         * Incorrect submission:
+         * record it separately and release
+         * the reserved quota slot.
+         */
+        await AssignmentQuota.findOneAndUpdate(
+          {
+            topic,
+            condition,
+            pattern: normalizedPattern,
+
+            reservedCount: {
+              $gt: 0,
+            },
+          },
+          {
+            $inc: {
+              incorrectCount: 1,
+              reservedCount: -1,
+            },
+          },
+        );
+      }
     }
 
     return res.status(201).json({

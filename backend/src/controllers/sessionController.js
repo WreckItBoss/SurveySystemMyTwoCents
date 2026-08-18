@@ -40,7 +40,9 @@ export async function startSession(req, res, next) {
       expiresAt,
     });
   } catch (error) {
-    if (error.message === "NO_ASSIGNMENTS_AVAILABLE") {
+    if (
+      error.message === "NO_ASSIGNMENTS_AVAILABLE"
+    ) {
       return res.status(409).json({
         message: "募集人数に達しました。",
       });
@@ -48,7 +50,8 @@ export async function startSession(req, res, next) {
 
     if (error.message === "ASSIGNMENT_FAILED") {
       return res.status(503).json({
-        message: "参加条件の割り当てに失敗しました。",
+        message:
+          "参加条件の割り当てに失敗しました。",
       });
     }
 
@@ -56,7 +59,11 @@ export async function startSession(req, res, next) {
   }
 }
 
-export async function expireSession(req, res, next) {
+export async function expireSession(
+  req,
+  res,
+  next,
+) {
   try {
     const { sessionId } = req.params;
 
@@ -64,7 +71,7 @@ export async function expireSession(req, res, next) {
      * Only expire a session that is still active.
      *
      * If it was already completed or already expired,
-     * nothing should be released again.
+     * nothing should be released or counted again.
      */
     const expiredSession =
       await Session.findOneAndUpdate(
@@ -98,7 +105,11 @@ export async function expireSession(req, res, next) {
         : null;
 
     /*
-     * Release the quota slot immediately.
+     * Release the reserved quota slot and
+     * record the expired participant.
+     *
+     * reservedCount -1
+     * expiredCount  +1
      */
     await AssignmentQuota.findOneAndUpdate(
       {
@@ -113,6 +124,7 @@ export async function expireSession(req, res, next) {
       {
         $inc: {
           reservedCount: -1,
+          expiredCount: 1,
         },
       },
     );

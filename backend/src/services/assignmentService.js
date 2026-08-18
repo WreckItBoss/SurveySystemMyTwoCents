@@ -55,7 +55,11 @@ async function releaseExpiredSessions() {
     }
 
     /*
-     * Release the quota reservation.
+     * Release the quota reservation and record
+     * the expired participant.
+     *
+     * reservedCount -1
+     * expiredCount  +1
      */
     await AssignmentQuota.findOneAndUpdate(
       {
@@ -66,7 +70,7 @@ async function releaseExpiredSessions() {
             ? expiredSession.pattern
             : null,
 
-        // Safety check so it never becomes negative.
+        // Safety check so reservedCount never becomes negative.
         reservedCount: {
           $gt: 0,
         },
@@ -74,6 +78,7 @@ async function releaseExpiredSessions() {
       {
         $inc: {
           reservedCount: -1,
+          expiredCount: 1,
         },
       },
     );
@@ -84,7 +89,7 @@ export async function reserveAssignment() {
   /*
    * Before assigning a new participant,
    * free reservations belonging to sessions
-   * that have been inactive for more than 40 minutes.
+   * whose 40-minute limit has expired.
    */
   await releaseExpiredSessions();
 
