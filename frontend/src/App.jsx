@@ -5,6 +5,7 @@ import PreSurveyPage from "./pages/PreSurveyPage/PreSurveyPage";
 import ExperimentPage from "./pages/ExperimentPage/ExperimentPage";
 import PostSurveyPage from "./pages/PostSurveyPage/PostSurveyPage";
 import CompletionPage from "./pages/CompletionPage/CompletionPage";
+import SessionClosedPage from "./pages/SessionClosedPage/SessionClosedPage";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -41,8 +42,20 @@ const initialResponses = {
 };
 
 export default function App() {
-  const [timeoutMessage, setTimeoutMessage] =
-    useState("");
+  /*
+   * sessionClosed is intentionally NOT stored
+   * in localStorage.
+   *
+   * Timeout:
+   * -> show SessionClosedPage for this visit
+   *
+   * Refresh / reopen:
+   * -> sessionClosed becomes false again
+   * -> localStorage is empty
+   * -> ConsentPage is shown
+   */
+  const [sessionClosed, setSessionClosed] =
+    useState(false);
 
   /*
    * Restore existing assignment after refresh.
@@ -218,8 +231,8 @@ export default function App() {
   }
 
   /*
-   * Create an assignment only after
-   * the participant clicks "同意して次へ".
+   * Assignment happens ONLY after
+   * "同意して次へ" is clicked.
    */
   async function handleConsentNext() {
     if (isLoadingAssignment) {
@@ -227,14 +240,8 @@ export default function App() {
     }
 
     /*
-     * Remove an old timeout message when
-     * the participant tries to join again.
-     */
-    setTimeoutMessage("");
-
-    /*
-     * If an assignment already exists,
-     * do not create another reservation.
+     * Existing active assignment:
+     * reuse it instead of reserving again.
      */
     if (assignment) {
       goNext();
@@ -262,7 +269,7 @@ export default function App() {
       }
 
       /*
-       * All available experimental cells are full.
+       * No experimental slots remain.
        */
       if (response.status === 409) {
         setAssignmentError(
@@ -290,8 +297,7 @@ export default function App() {
       );
 
       /*
-       * Questionnaire timing begins when
-       * the assignment is created.
+       * Timing begins when assignment happens.
        */
       const newStartedAt =
         new Date().toISOString();
@@ -325,65 +331,84 @@ export default function App() {
   }
 
   /*
-   * Save responses whenever they change.
+   * Save responses while the current
+   * questionnaire session is active.
    */
   useEffect(() => {
+    if (sessionClosed) {
+      return;
+    }
+
     localStorage.setItem(
       "mtcResponses",
       JSON.stringify(responses),
     );
-  }, [responses]);
+  }, [responses, sessionClosed]);
 
   /*
-   * Save current questionnaire page.
+   * Save current page while the current
+   * questionnaire session is active.
    */
   useEffect(() => {
+    if (sessionClosed) {
+      return;
+    }
+
     localStorage.setItem(
       "mtcCurrentPage",
       String(currentPageIndex),
     );
-  }, [currentPageIndex]);
+  }, [currentPageIndex, sessionClosed]);
 
   /*
    * Preserve completion code.
    */
   useEffect(() => {
-    if (completionCode) {
+    if (
+      completionCode &&
+      !sessionClosed
+    ) {
       localStorage.setItem(
         "mtcCompletionCode",
         completionCode,
       );
     }
-  }, [completionCode]);
+  }, [completionCode, sessionClosed]);
 
   /*
    * If there is no assignment but the browser
-   * thinks the participant was on a later page,
-   * return them to Consent.
+   * thinks it was on a later questionnaire page,
+   * return to Consent.
    */
   useEffect(() => {
     if (
+      !sessionClosed &&
       !assignment &&
       currentPageIndex > 0
     ) {
       setCurrentPageIndex(0);
     }
-  }, [assignment, currentPageIndex]);
+  }, [
+    assignment,
+    currentPageIndex,
+    sessionClosed,
+  ]);
 
   /*
    * SESSION TIMEOUT
    *
-   * The backend provides expiresAt when the
-   * session is created.
+   * When expiresAt is reached:
    *
-   * Once the expiration time is reached:
-   * - clear the assignment
-   * - clear questionnaire answers
-   * - clear localStorage
-   * - return to Consent
-   * - show a timeout message
+   * 1. Tell backend to expire the session.
+   * 2. Backend releases reservedCount.
+   * 3. Clear questionnaire localStorage.
+   * 4. Show SessionClosedPage for THIS visit.
+   *
+   * sessionClosed is not persisted.
+   * Therefore refreshing/reopening the questionnaire
+   * starts again from Consent.
    */
-useEffect(() => {
+  useEffect(() => {
     if (
       !assignment?.expiresAt ||
       completionCode
@@ -407,21 +432,15 @@ useEffect(() => {
 
     async function handleSessionTimeout() {
       /*
-      * Keep the sessionId before clearing
-      * the assignment from React/localStorage.
-      */
+       * Save sessionId before removing assignment.
+       */
       const expiredSessionId =
         assignment.sessionId;
 
       /*
-      * Tell the backend that this session
-      * has expired.
-      *
-      * The backend changes:
-      * active -> expired
-      *
-      * and releases reservedCount.
-      */
+       * Immediately tell backend to release
+       * this reservation.
+       */
       try {
         const response = await fetch(
           `${API_URL}/api/sessions/${expiredSessionId}/expire`,
@@ -446,13 +465,9 @@ useEffect(() => {
         }
       } catch (error) {
         /*
-        * Even if the request fails because of
-        * network problems, reset the frontend.
-        *
-        * The backend's releaseExpiredSessions()
-        * remains the fallback and will release
-        * this reservation later.
-        */
+         * The backend cleanup in assignmentService
+         * remains the fallback if this request fails.
+         */
         console.error(
           "Failed to notify backend of timeout:",
           error,
@@ -460,26 +475,22 @@ useEffect(() => {
       }
 
       /*
-      * Reset React state.
-      */
+       * Clear React questionnaire state.
+       */
       setAssignment(null);
       setResponses(initialResponses);
-      setCurrentPageIndex(0);
       setStartedAt("");
       setCompletionCode("");
       setSubmitError("");
       setAssignmentError("");
+      setCurrentPageIndex(0);
 
       /*
-      * Inform participant.
-      */
-      setTimeoutMessage(
-        "回答時間の上限（40分）を超えたため、セッションが終了しました。参加を希望される場合は、再度内容をご確認のうえ「同意して次へ」を押してください。",
-      );
-
-      /*
-      * Clear old local session.
-      */
+       * Clear ALL questionnaire localStorage.
+       *
+       * Because sessionClosed itself is not saved,
+       * reopening or refreshing starts at Consent.
+       */
       localStorage.removeItem(
         "mtcAssignment",
       );
@@ -500,6 +511,11 @@ useEffect(() => {
         "mtcCompletionCode",
       );
 
+      /*
+       * Close only this current browser visit.
+       */
+      setSessionClosed(true);
+
       window.scrollTo({
         top: 0,
         behavior: "smooth",
@@ -510,9 +526,9 @@ useEffect(() => {
       expiresAtTime - Date.now();
 
     /*
-    * Also handles reopening the website
-    * after the session already expired.
-    */
+     * Handles reopening a still-saved session
+     * after its expiration time has already passed.
+     */
     if (remainingTime <= 0) {
       handleSessionTimeout();
       return;
@@ -542,13 +558,17 @@ useEffect(() => {
     setSubmitError("");
 
     const submissionData = {
-      sessionId: assignment.sessionId,
+      sessionId:
+        assignment.sessionId,
 
-      topic: assignment.topic,
+      topic:
+        assignment.topic,
 
-      condition: assignment.condition,
+      condition:
+        assignment.condition,
 
-      pattern: assignment.pattern,
+      pattern:
+        assignment.pattern,
 
       ageGroup:
         responses.preSurvey.ageGroup,
@@ -670,14 +690,24 @@ useEffect(() => {
     }
   }
 
+  /*
+   * Timeout closes only this current visit.
+   */
+  if (sessionClosed) {
+    return <SessionClosedPage />;
+  }
+
   return (
     <>
       {currentPage === "consent" && (
         <ConsentPage
           onNext={handleConsentNext}
-          isLoading={isLoadingAssignment}
-          assignmentError={assignmentError}
-          timeoutMessage={timeoutMessage}
+          isLoading={
+            isLoadingAssignment
+          }
+          assignmentError={
+            assignmentError
+          }
         />
       )}
 
@@ -705,9 +735,15 @@ useEffect(() => {
       {currentPage === "experiment" &&
         assignment && (
           <ExperimentPage
-            assignment={assignment}
-            onPrevious={goPrevious}
-            onNext={goNext}
+            assignment={
+              assignment
+            }
+            onPrevious={
+              goPrevious
+            }
+            onNext={
+              goNext
+            }
           />
         )}
 

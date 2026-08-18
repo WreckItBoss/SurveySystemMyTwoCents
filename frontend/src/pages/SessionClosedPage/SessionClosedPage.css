@@ -1,0 +1,62 @@
+.session-closed-page {
+  min-height: 100vh;
+  padding: 40px 20px;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  background: #f5f7f9;
+}
+
+.session-closed-card {
+  width: 100%;
+  max-width: 800px;
+  padding: 40px;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 18px
+    rgba(0, 0, 0, 0.08);
+}
+
+.session-closed-eyebrow {
+  margin: 0 0 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #f20808;
+}
+
+.session-closed-card h1 {
+  margin: 0 0 28px;
+  font-size: 1.8rem;
+  line-height: 1.4;
+  color: rgb(76, 88, 100);
+}
+
+.session-closed-content {
+  padding: 20px;
+  border-radius: 8px;
+  background: #fff8e6;
+}
+
+.session-closed-content p {
+  margin: 0;
+  color: rgb(76, 88, 100);
+  line-height: 1.8;
+}
+
+.session-closed-content p + p {
+  margin-top: 16px;
+}
+
+@media (max-width: 640px) {
+  .session-closed-page {
+    padding: 20px 12px;
+  }
+
+  .session-closed-card {
+    padding: 24px 20px;
+  }
+
+  .session-closed-card h1 {
+    font-size: 1.55rem;
+  }
+}
