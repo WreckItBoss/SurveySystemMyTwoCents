@@ -1,0 +1,73 @@
+import mongoose from "mongoose";
+
+const sessionSchema = new mongoose.Schema(
+  {
+    sessionId: {
+      type: String,
+      required: true,
+      unique: true,
+    },
+
+    topic: {
+      type: String,
+      required: true,
+      enum: [
+        "nuclearenergy",
+        "selfdrivingcars",
+        "surveillance",
+      ],
+    },
+
+    condition: {
+      type: String,
+      required: true,
+      enum: [
+        "news",
+        "mytwocents",
+      ],
+    },
+
+    pattern: {
+      type: String,
+      default: null,
+    },
+
+    status: {
+      type: String,
+      required: true,
+      enum: [
+        "active",
+        "completed_correct",
+        "completed_incorrect",
+        "expired",
+      ],
+      default: "active",
+    },
+
+    startedAt: {
+      type: Date,
+      required: true,
+      default: Date.now,
+    },
+
+    expiresAt: {
+      type: Date,
+      required: true,
+    },
+
+    completedAt: {
+      type: Date,
+      default: null,
+    },
+  },
+  {
+    timestamps: true,
+  },
+);
+
+const Session = mongoose.model(
+  "Session",
+  sessionSchema,
+);
+
+export default Session;
