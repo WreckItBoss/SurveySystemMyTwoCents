@@ -28,6 +28,7 @@ const initialResponses = {
   postSurvey: {
     understanding: null,
     newInformation: null,
+    perspectiveComparison: null,
     furtherExploration: null,
     chatbotAppropriateness: null,
     chatbotTrustworthiness: null,
@@ -588,6 +589,9 @@ export default function App() {
 
       postNewInformation:
         responses.postSurvey.newInformation,
+
+      postPerspectiveComparison:
+        responses.postSurvey.perspectiveComparison,
 
       postFurtherExploration:
         responses.postSurvey
