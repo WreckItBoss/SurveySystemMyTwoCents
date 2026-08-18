@@ -1,5 +1,6 @@
 import Response from "../Models/Response.js";
 import AssignmentQuota from "../Models/AssignmentQuota.js";
+import Session from "../Models/Session.js";
 
 const CORRECT_KEYWORD = "ワニ";
 
@@ -129,8 +130,29 @@ export async function createResponse(req, res, next) {
     });
 
     /*
-     * Monitor how many participants actually completed
-     * this experimental condition.
+     * Mark the session as completed so it will
+     * no longer be treated as an active session
+     * by the timeout cleanup logic.
+     */
+    await Session.findOneAndUpdate(
+      {
+        sessionId,
+        status: "active",
+      },
+      {
+        $set: {
+          status: keywordCorrect
+            ? "completed_correct"
+            : "completed_incorrect",
+
+          completedAt,
+        },
+      },
+    );
+
+    /*
+     * Monitor how many participants actually
+     * completed this experimental condition.
      */
     await AssignmentQuota.findOneAndUpdate(
       {
