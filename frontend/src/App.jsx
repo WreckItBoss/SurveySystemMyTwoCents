@@ -33,6 +33,7 @@ const initialResponses = {
     chatbotTrustworthiness: null,
     chatbotEngagement: null,
     postStance: null,
+    systemComment: "",
     freeComment: "",
   },
 
@@ -606,6 +607,9 @@ export default function App() {
 
       postStance:
         responses.postSurvey.postStance,
+
+      systemComment:
+        responses.postSurvey.systemComment,
 
       freeComment:
         responses.postSurvey.freeComment,
