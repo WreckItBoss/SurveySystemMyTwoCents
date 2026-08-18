@@ -1,5 +1,6 @@
 import crypto from "node:crypto";
 import Session from "../Models/Session.js";
+import AssignmentQuota from "../Models/AssignmentQuota.js";
 import { reserveAssignment } from "../services/assignmentService.js";
 
 const topicLabels = {
@@ -51,6 +52,75 @@ export async function startSession(req, res, next) {
       });
     }
 
+    next(error);
+  }
+}
+
+export async function expireSession(req, res, next) {
+  try {
+    const { sessionId } = req.params;
+
+    /*
+     * Only expire a session that is still active.
+     *
+     * If it was already completed or already expired,
+     * nothing should be released again.
+     */
+    const expiredSession =
+      await Session.findOneAndUpdate(
+        {
+          sessionId,
+          status: "active",
+        },
+        {
+          $set: {
+            status: "expired",
+          },
+        },
+        {
+          new: true,
+        },
+      );
+
+    /*
+     * If the session is already completed/expired
+     * or doesn't exist, do nothing.
+     */
+    if (!expiredSession) {
+      return res.status(200).json({
+        expired: false,
+      });
+    }
+
+    const normalizedPattern =
+      expiredSession.condition === "mytwocents"
+        ? expiredSession.pattern
+        : null;
+
+    /*
+     * Release the quota slot immediately.
+     */
+    await AssignmentQuota.findOneAndUpdate(
+      {
+        topic: expiredSession.topic,
+        condition: expiredSession.condition,
+        pattern: normalizedPattern,
+
+        reservedCount: {
+          $gt: 0,
+        },
+      },
+      {
+        $inc: {
+          reservedCount: -1,
+        },
+      },
+    );
+
+    return res.status(200).json({
+      expired: true,
+    });
+  } catch (error) {
     next(error);
   }
 }
