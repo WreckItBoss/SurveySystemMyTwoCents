@@ -2,7 +2,7 @@ import "dotenv/config";
 import mongoose from "mongoose";
 
 import connectDatabase from "../config/database.js";
-import AssignmentQuota from "../models/AssignmentQuota.js";
+import AssignmentQuota from "../Models/AssignmentQuota.js";
 
 const topics = [
   "nuclearenergy",

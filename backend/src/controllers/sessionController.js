@@ -1,5 +1,5 @@
 import crypto from "node:crypto";
-import Session from "../models/Session.js";
+import Session from "../Models/Session.js";
 import { reserveAssignment } from "../services/assignmentService.js";
 
 const topicLabels = {
