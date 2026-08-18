@@ -6,8 +6,6 @@ import ExperimentPage from "./pages/ExperimentPage/ExperimentPage";
 import PostSurveyPage from "./pages/PostSurveyPage/PostSurveyPage";
 import CompletionPage from "./pages/CompletionPage/CompletionPage";
 
-// Local: frontend/.env -> http://localhost:5050
-// Production: Vercel -> Render backend URL
 const API_URL = import.meta.env.VITE_API_URL;
 
 const PAGE_ORDER = [
@@ -44,31 +42,38 @@ const initialResponses = {
 
 export default function App() {
   /*
-   * Preserve the original questionnaire start time
-   * even if the participant refreshes the page.
+   * Restore an existing assignment after refresh.
+   *
+   * IMPORTANT:
+   * We do NOT create a new assignment here anymore.
    */
-  const [startedAt] = useState(() => {
-    const savedStartedAt =
-      localStorage.getItem("mtcStartedAt");
+  const [assignment, setAssignment] = useState(() => {
+    const savedAssignment =
+      localStorage.getItem("mtcAssignment");
 
-    if (savedStartedAt) {
-      return savedStartedAt;
+    if (!savedAssignment) {
+      return null;
     }
 
-    const newStartedAt =
-      new Date().toISOString();
-
-    localStorage.setItem(
-      "mtcStartedAt",
-      newStartedAt,
-    );
-
-    return newStartedAt;
+    try {
+      return JSON.parse(savedAssignment);
+    } catch {
+      localStorage.removeItem("mtcAssignment");
+      return null;
+    }
   });
 
   /*
-   * Restore the page the participant was on
-   * before refreshing.
+   * Preserve questionnaire start time.
+   */
+  const [startedAt, setStartedAt] = useState(() => {
+    return (
+      localStorage.getItem("mtcStartedAt") || ""
+    );
+  });
+
+  /*
+   * Restore current page after refresh.
    */
   const [
     currentPageIndex,
@@ -94,9 +99,6 @@ export default function App() {
     return parsedPage;
   });
 
-  const [assignment, setAssignment] =
-    useState(null);
-
   const [
     assignmentError,
     setAssignmentError,
@@ -105,7 +107,7 @@ export default function App() {
   const [
     isLoadingAssignment,
     setIsLoadingAssignment,
-  ] = useState(true);
+  ] = useState(false);
 
   /*
    * Restore questionnaire answers after refresh.
@@ -127,8 +129,7 @@ export default function App() {
     });
 
   /*
-   * If they already submitted and refresh,
-   * preserve the completion code.
+   * Preserve completion code after refresh.
    */
   const [
     completionCode,
@@ -171,10 +172,7 @@ export default function App() {
   function goPrevious() {
     setCurrentPageIndex(
       (previousIndex) =>
-        Math.max(
-          previousIndex - 1,
-          0,
-        ),
+        Math.max(previousIndex - 1, 0),
     );
 
     scrollToTop();
@@ -184,129 +182,152 @@ export default function App() {
     questionKey,
     value,
   ) {
-    setResponses(
-      (previousResponses) => ({
-        ...previousResponses,
+    setResponses((previousResponses) => ({
+      ...previousResponses,
 
-        preSurvey: {
-          ...previousResponses.preSurvey,
-          [questionKey]: value,
-        },
-      }),
-    );
+      preSurvey: {
+        ...previousResponses.preSurvey,
+        [questionKey]: value,
+      },
+    }));
   }
 
   function updatePostSurveyAnswer(
     questionKey,
     value,
   ) {
-    setResponses(
-      (previousResponses) => ({
-        ...previousResponses,
+    setResponses((previousResponses) => ({
+      ...previousResponses,
 
-        postSurvey: {
-          ...previousResponses.postSurvey,
-          [questionKey]: value,
-        },
-      }),
-    );
+      postSurvey: {
+        ...previousResponses.postSurvey,
+        [questionKey]: value,
+      },
+    }));
   }
 
-  function updateCompletionKeyword(
-    value,
-  ) {
-    setResponses(
-      (previousResponses) => ({
-        ...previousResponses,
+  function updateCompletionKeyword(value) {
+    setResponses((previousResponses) => ({
+      ...previousResponses,
 
-        completionCheck: {
-          ...previousResponses.completionCheck,
-          keyword: value,
-        },
-      }),
-    );
+      completionCheck: {
+        ...previousResponses.completionCheck,
+        keyword: value,
+      },
+    }));
   }
 
   /*
-   * Get an experimental assignment.
+   * Called ONLY after the participant clicks
+   * "同意して次へ".
    *
-   * If one already exists in localStorage,
-   * reuse it instead of reserving another quota.
+   * This is now the moment when the participant
+   * receives an experimental assignment.
    */
-  useEffect(() => {
-    async function startSession() {
-      try {
-        setIsLoadingAssignment(true);
-        setAssignmentError("");
-
-        const savedAssignment =
-          localStorage.getItem(
-            "mtcAssignment",
-          );
-
-        if (savedAssignment) {
-          try {
-            setAssignment(
-              JSON.parse(savedAssignment),
-            );
-
-            return;
-          } catch {
-            localStorage.removeItem(
-              "mtcAssignment",
-            );
-          }
-        }
-
-        const response = await fetch(
-          `${API_URL}/api/sessions/start`,
-          {
-            method: "POST",
-          },
-        );
-
-        const result =
-          await response.json();
-
-        if (!response.ok) {
-          throw new Error(
-            result.message ||
-              "実験条件の割り当てに失敗しました。",
-          );
-        }
-
-        setAssignment(result);
-
-        localStorage.setItem(
-          "mtcAssignment",
-          JSON.stringify(result),
-        );
-
-        console.log(
-          "Assigned condition:",
-          result,
-        );
-      } catch (error) {
-        console.error(
-          "Assignment failed:",
-          error,
-        );
-
-        setAssignmentError(
-          error.message ||
-            "実験条件の割り当てに失敗しました。",
-        );
-      } finally {
-        setIsLoadingAssignment(false);
-      }
+  async function handleConsentNext() {
+    if (isLoadingAssignment) {
+      return;
     }
 
-    startSession();
-  }, []);
+    /*
+     * If an assignment already exists, such as
+     * after returning to the consent page,
+     * do not reserve another slot.
+     */
+    if (assignment) {
+      goNext();
+      return;
+    }
+
+    try {
+      setIsLoadingAssignment(true);
+      setAssignmentError("");
+
+      const response = await fetch(
+        `${API_URL}/api/sessions/start`,
+        {
+          method: "POST",
+        },
+      );
+
+      const responseText =
+        await response.text();
+
+      let result = {};
+
+      if (responseText) {
+        result = JSON.parse(responseText);
+      }
+
+      /*
+       * No experimental slots remain.
+       */
+      if (response.status === 409) {
+        setAssignmentError(
+          "募集人数に達したため、現在このアンケートには参加できません。",
+        );
+
+        return;
+      }
+
+      if (!response.ok) {
+        throw new Error(
+          result.message ||
+            "実験条件の割り当てに失敗しました。",
+        );
+      }
+
+      /*
+       * Save the assignment.
+       */
+      setAssignment(result);
+
+      localStorage.setItem(
+        "mtcAssignment",
+        JSON.stringify(result),
+      );
+
+      /*
+       * Questionnaire timing starts when the
+       * participant is actually assigned.
+       */
+      const newStartedAt =
+        new Date().toISOString();
+
+      setStartedAt(newStartedAt);
+
+      localStorage.setItem(
+        "mtcStartedAt",
+        newStartedAt,
+      );
+
+      console.log(
+        "Assigned condition:",
+        result,
+      );
+
+      /*
+       * Assignment succeeded.
+       * Move to PreSurvey.
+       */
+      goNext();
+    } catch (error) {
+      console.error(
+        "Assignment failed:",
+        error,
+      );
+
+      setAssignmentError(
+        error.message ||
+          "実験条件の割り当てに失敗しました。",
+      );
+    } finally {
+      setIsLoadingAssignment(false);
+    }
+  }
 
   /*
-   * Save questionnaire answers whenever
-   * they change.
+   * Save responses whenever they change.
    */
   useEffect(() => {
     localStorage.setItem(
@@ -326,7 +347,7 @@ export default function App() {
   }, [currentPageIndex]);
 
   /*
-   * Preserve completion code after submission.
+   * Preserve completion code.
    */
   useEffect(() => {
     if (completionCode) {
@@ -336,6 +357,22 @@ export default function App() {
       );
     }
   }, [completionCode]);
+
+  /*
+   * Safety:
+   *
+   * If there is no assignment but localStorage
+   * says the participant was on a later page,
+   * return them to Consent.
+   */
+  useEffect(() => {
+    if (
+      !assignment &&
+      currentPageIndex > 0
+    ) {
+      setCurrentPageIndex(0);
+    }
+  }, [assignment, currentPageIndex]);
 
   async function submitStudy() {
     if (
@@ -350,17 +387,13 @@ export default function App() {
     setSubmitError("");
 
     const submissionData = {
-      sessionId:
-        assignment.sessionId,
+      sessionId: assignment.sessionId,
 
-      topic:
-        assignment.topic,
+      topic: assignment.topic,
 
-      condition:
-        assignment.condition,
+      condition: assignment.condition,
 
-      pattern:
-        assignment.pattern,
+      pattern: assignment.pattern,
 
       ageGroup:
         responses.preSurvey.ageGroup,
@@ -372,16 +405,13 @@ export default function App() {
         responses.preSurvey.preStance,
 
       preKnowledge:
-        responses.preSurvey
-          .topicKnowledge,
+        responses.preSurvey.topicKnowledge,
 
       postUnderstanding:
-        responses.postSurvey
-          .understanding,
+        responses.postSurvey.understanding,
 
       postNewInformation:
-        responses.postSurvey
-          .newInformation,
+        responses.postSurvey.newInformation,
 
       postFurtherExploration:
         responses.postSurvey
@@ -406,69 +436,71 @@ export default function App() {
         responses.postSurvey.freeComment,
 
       keywordAnswer:
-        responses.completionCheck
-          .keyword,
+        responses.completionCheck.keyword,
 
       startedAt,
     };
 
-  try {
-    const response = await fetch(
-      `${API_URL}/api/responses`,
-      {
-        method: "POST",
+    try {
+      const response = await fetch(
+        `${API_URL}/api/responses`,
+        {
+          method: "POST",
 
-        headers: {
-          "Content-Type": "application/json",
+          headers: {
+            "Content-Type":
+              "application/json",
+          },
+
+          body: JSON.stringify(
+            submissionData,
+          ),
         },
-
-        body: JSON.stringify(submissionData),
-      },
-    );
-
-    // Read the raw response first so an empty
-    // backend response doesn't crash response.json().
-    const responseText = await response.text();
-
-    console.log(
-      "Response status:",
-      response.status,
-    );
-
-    console.log(
-      "Raw backend response:",
-      responseText,
-    );
-
-    let result = {};
-
-    if (responseText) {
-      result = JSON.parse(responseText);
-    }
-
-    console.log(
-      "Backend response:",
-      result,
-    );
-
-    if (!response.ok) {
-      throw new Error(
-        result.errors?.join(", ") ||
-          result.message ||
-          `回答の保存に失敗しました。 (${response.status})`,
       );
-    }
 
-    if (!result.completionCode) {
-      throw new Error(
-        "回答は送信されましたが、完了コードを取得できませんでした。",
+      const responseText =
+        await response.text();
+
+      console.log(
+        "Response status:",
+        response.status,
       );
-    }
 
-    setCompletionCode(
-      result.completionCode,
-    );
-  } catch (error) {
+      console.log(
+        "Raw backend response:",
+        responseText,
+      );
+
+      let result = {};
+
+      if (responseText) {
+        result =
+          JSON.parse(responseText);
+      }
+
+      console.log(
+        "Backend response:",
+        result,
+      );
+
+      if (!response.ok) {
+        throw new Error(
+          result.errors?.join(", ") ||
+            result.message ||
+            `回答の保存に失敗しました。 (${response.status})`,
+        );
+      }
+
+      if (!result.completionCode) {
+        throw new Error(
+          "回答は送信されましたが、完了コードを取得できませんでした。",
+        );
+      }
+
+      setCompletionCode(
+        result.completionCode,
+      );
+    } catch (error) {
       console.error(
         "Submission failed:",
         error,
@@ -483,126 +515,104 @@ export default function App() {
     }
   }
 
-  /*
-   * Do not render the questionnaire until
-   * an assignment has been loaded.
-   */
-  if (isLoadingAssignment) {
-    return (
-      <p>
-        実験を準備しています...
-      </p>
-    );
-  }
-
-  if (assignmentError) {
-    return (
-      <p>
-        {assignmentError}
-      </p>
-    );
-  }
-
-  if (!assignment) {
-    return (
-      <p>
-        実験条件を読み込めませんでした。
-      </p>
-    );
-  }
-
   return (
     <>
       {currentPage === "consent" && (
         <ConsentPage
-          onNext={goNext}
+          onNext={handleConsentNext}
+          isLoading={isLoadingAssignment}
+          assignmentError={assignmentError}
         />
       )}
 
-      {currentPage === "preSurvey" && (
-        <PreSurveyPage
-          topic={
-            assignment.topicLabel
-          }
-          answers={
-            responses.preSurvey
-          }
-          onAnswerChange={
-            updatePreSurveyAnswer
-          }
-          onPrevious={
-            goPrevious
-          }
-          onNext={
-            goNext
-          }
-        />
-      )}
+      {currentPage === "preSurvey" &&
+        assignment && (
+          <PreSurveyPage
+            topic={
+              assignment.topicLabel
+            }
+            answers={
+              responses.preSurvey
+            }
+            onAnswerChange={
+              updatePreSurveyAnswer
+            }
+            onPrevious={
+              goPrevious
+            }
+            onNext={
+              goNext
+            }
+          />
+        )}
 
-      {currentPage === "experiment" && (
-        <ExperimentPage
-          assignment={
-            assignment
-          }
-          onPrevious={
-            goPrevious
-          }
-          onNext={
-            goNext
-          }
-        />
-      )}
+      {currentPage === "experiment" &&
+        assignment && (
+          <ExperimentPage
+            assignment={
+              assignment
+            }
+            onPrevious={
+              goPrevious
+            }
+            onNext={
+              goNext
+            }
+          />
+        )}
 
-      {currentPage === "postSurvey" && (
-        <PostSurveyPage
-          topic={
-            assignment.topicLabel
-          }
-          condition={
-            assignment.condition
-          }
-          answers={
-            responses.postSurvey
-          }
-          onAnswerChange={
-            updatePostSurveyAnswer
-          }
-          onPrevious={
-            goPrevious
-          }
-          onSubmit={
-            goNext
-          }
-        />
-      )}
+      {currentPage === "postSurvey" &&
+        assignment && (
+          <PostSurveyPage
+            topic={
+              assignment.topicLabel
+            }
+            condition={
+              assignment.condition
+            }
+            answers={
+              responses.postSurvey
+            }
+            onAnswerChange={
+              updatePostSurveyAnswer
+            }
+            onPrevious={
+              goPrevious
+            }
+            onSubmit={
+              goNext
+            }
+          />
+        )}
 
-      {currentPage === "completion" && (
-        <CompletionPage
-          selectedKeyword={
-            responses
-              .completionCheck
-              .keyword
-          }
-          onKeywordChange={
-            updateCompletionKeyword
-          }
-          onSubmit={
-            submitStudy
-          }
-          onPrevious={
-            goPrevious
-          }
-          completionCode={
-            completionCode
-          }
-          isSubmitting={
-            isSubmitting
-          }
-          submitError={
-            submitError
-          }
-        />
-      )}
+      {currentPage === "completion" &&
+        assignment && (
+          <CompletionPage
+            selectedKeyword={
+              responses
+                .completionCheck
+                .keyword
+            }
+            onKeywordChange={
+              updateCompletionKeyword
+            }
+            onSubmit={
+              submitStudy
+            }
+            onPrevious={
+              goPrevious
+            }
+            completionCode={
+              completionCode
+            }
+            isSubmitting={
+              isSubmitting
+            }
+            submitError={
+              submitError
+            }
+          />
+        )}
     </>
   );
 }
