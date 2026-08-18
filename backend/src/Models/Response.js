@@ -70,6 +70,13 @@ const responseSchema = new mongoose.Schema(
       max: 5,
     },
 
+    postPerspectiveComparison: {
+      type: Number,
+      required: true,
+      min: 1,
+      max: 5,
+    },
+
     postFurtherExploration: {
       type: Number,
       required: true,
