@@ -39,6 +39,11 @@ export default function createPostSurveyQuestions(topic, condition) {
       label: `${contentLabel}を読むことで、新しい情報を知ることができましたか。`,
       options: agreementOptions,
     },
+      {
+      key: "perspectiveComparison",
+      label: `${contentLabel}を読むことで、様々な意見を比較することができましたか。`,
+      options: agreementOptions,
+    },
     {
       key: "furtherExploration",
       label: `${contentLabel}を読むことで、関連する話題や他の記事をさらに調べてみたいという気持ちになりましたか。`,
