@@ -48,6 +48,16 @@ const assignmentQuotaSchema = new mongoose.Schema(
       default: 0,
       min: 0,
     },
+    incorrectCount: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
+    expiredCount: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
   },
   {
     timestamps: true,
