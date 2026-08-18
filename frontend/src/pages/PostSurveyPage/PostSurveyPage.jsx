@@ -1,4 +1,5 @@
 import PostSurveyQuestions, {
+  systemCommentQuestion,
   freeCommentQuestion,
 } from "../../components/Questions/PostSurveyQuestions/PostSurveyQuestions";
 import QuestionScale from "../../components/QuestionScale/QuestionScale";
@@ -16,6 +17,8 @@ export default function PostSurveyPage({
   isSubmitting = false,
 }) {
   const questions = PostSurveyQuestions(topic, condition);
+
+  const isMyTwoCents = condition === "mytwocents";
 
   const allRequiredQuestionsAnswered = questions.every(
     (question) =>
@@ -58,6 +61,18 @@ export default function PostSurveyPage({
             />
           ))}
 
+          {isMyTwoCents && (
+            <FreeTextArea
+              label={systemCommentQuestion.label}
+              placeholder={systemCommentQuestion.placeholder}
+              value={answers.systemComment ?? ""}
+              onChange={(value) =>
+                onAnswerChange("systemComment", value)
+              }
+              maxLength={1000}
+            />
+          )}
+
           <FreeTextArea
             label={freeCommentQuestion.label}
             placeholder={freeCommentQuestion.placeholder}
@@ -70,7 +85,10 @@ export default function PostSurveyPage({
         </div>
 
         {isSubmitting && (
-          <p className="post-survey-page__submitting" role="status">
+          <p
+            className="post-survey-page__submitting"
+            role="status"
+          >
             回答を送信しています。画面を閉じないでください。
           </p>
         )}
