@@ -105,6 +105,12 @@ const responseSchema = new mongoose.Schema(
       max: 4,
     },
 
+    systemComment: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
     freeComment: {
       type: String,
       default: "",
