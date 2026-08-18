@@ -18,7 +18,7 @@ export async function startSession(req, res, next) {
     const now = new Date();
 
     const expiresAt = new Date(
-      now.getTime() + 1 * 60 * 1000,
+      now.getTime() + 40 * 60 * 1000,
     );
 
     await Session.create({
