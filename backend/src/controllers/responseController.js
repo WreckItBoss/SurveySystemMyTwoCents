@@ -1,11 +1,12 @@
 import Response from "../Models/Response.js";
 import AssignmentQuota from "../Models/AssignmentQuota.js";
 import Session from "../Models/Session.js";
+import "dotenv/config";
 
 const CORRECT_KEYWORD = "ワニ";
 
-const CORRECT_COMPLETION_CODE = "5555";
-const INCORRECT_COMPLETION_CODE = "1010";
+const CORRECT_COMPLETION_CODE =  process.env.CORRECT_COMPLETION_CODE;
+const INCORRECT_COMPLETION_CODE = process.env.INCORRECT_COMPLETION_CODE;
 
 export async function createResponse(req, res, next) {
   try {
