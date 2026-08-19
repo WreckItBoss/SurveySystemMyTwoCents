@@ -249,8 +249,6 @@ export default function ConsentPage({
 
             <p>
               実施機関：奈良先端科学技術大学院大学
-              <br />
-              お問い合わせ先：research.naist.s2026@gmail.com
             </p>
           </section>
           {timeoutMessage && (
