@@ -17,7 +17,7 @@ for (const topic of topics) {
     topic,
     condition: "news",
     pattern: null,
-    target: 25,
+    target: 10,
     reservedCount: 0,
   });
 
