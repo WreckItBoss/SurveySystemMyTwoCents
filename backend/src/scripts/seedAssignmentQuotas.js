@@ -18,16 +18,24 @@ for (const topic of topics) {
     condition: "news",
     pattern: null,
     target: 25,
-    reservedCount: 0,
+    completedCount: 0,
+    incorrectCount: 0,
+    expiredCount: 0,
   });
 
-  for (let patternNumber = 1; patternNumber <= 5; patternNumber += 1) {
+  for (
+    let patternNumber = 1;
+    patternNumber <= 5;
+    patternNumber += 1
+  ) {
     quotas.push({
       topic,
       condition: "mytwocents",
       pattern: `P0${patternNumber}`,
       target: 5,
-      reservedCount: 0,
+      completedCount: 0,
+      incorrectCount: 0,
+      expiredCount: 0,
     });
   }
 }

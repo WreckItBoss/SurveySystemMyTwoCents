@@ -169,13 +169,17 @@ export async function createResponse(req, res, next) {
      * Update quota statistics only if this
      * session successfully transitioned from
      * active to a completed state.
+     *
+     * Correct:
+     *   completedCount +1
+     *
+     * Incorrect:
+     *   incorrectCount +1
+     *
+     * There is no reservation counter anymore.
      */
     if (completedSession) {
       if (keywordCorrect) {
-        /*
-         * Correct submission:
-         * count as a valid completed participant.
-         */
         await AssignmentQuota.findOneAndUpdate(
           {
             topic,
@@ -189,25 +193,15 @@ export async function createResponse(req, res, next) {
           },
         );
       } else {
-        /*
-         * Incorrect submission:
-         * record it separately and release
-         * the reserved quota slot.
-         */
         await AssignmentQuota.findOneAndUpdate(
           {
             topic,
             condition,
             pattern: normalizedPattern,
-
-            reservedCount: {
-              $gt: 0,
-            },
           },
           {
             $inc: {
               incorrectCount: 1,
-              reservedCount: -1,
             },
           },
         );

@@ -70,8 +70,8 @@ export async function expireSession(
     /*
      * Only expire a session that is still active.
      *
-     * If it was already completed or already expired,
-     * nothing should be released or counted again.
+     * If it was already completed or expired,
+     * it must not be counted again.
      */
     const expiredSession =
       await Session.findOneAndUpdate(
@@ -90,7 +90,7 @@ export async function expireSession(
       );
 
     /*
-     * If the session is already completed/expired
+     * If the session was already completed/expired
      * or doesn't exist, do nothing.
      */
     if (!expiredSession) {
@@ -105,25 +105,19 @@ export async function expireSession(
         : null;
 
     /*
-     * Release the reserved quota slot and
-     * record the expired participant.
+     * Record the expired participant.
      *
-     * reservedCount -1
-     * expiredCount  +1
+     * There is no reserved quota slot
+     * to release anymore.
      */
     await AssignmentQuota.findOneAndUpdate(
       {
         topic: expiredSession.topic,
         condition: expiredSession.condition,
         pattern: normalizedPattern,
-
-        reservedCount: {
-          $gt: 0,
-        },
       },
       {
         $inc: {
-          reservedCount: -1,
           expiredCount: 1,
         },
       },

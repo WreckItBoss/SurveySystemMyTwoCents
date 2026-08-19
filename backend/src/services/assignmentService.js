@@ -10,8 +10,8 @@ function selectRandom(items) {
 }
 
 /*
- * Find sessions whose 40-minute reservation has expired
- * and release the quota slot they were occupying.
+ * Find active sessions whose 40-minute limit
+ * has expired and record them as expired.
  */
 async function releaseExpiredSessions() {
   const now = new Date();
@@ -27,8 +27,8 @@ async function releaseExpiredSessions() {
     /*
      * Atomically change active -> expired.
      *
-     * This is important because two requests could try to
-     * expire the same session at the same time.
+     * This prevents the same session from being
+     * counted as expired more than once.
      */
     const expiredSession =
       await Session.findOneAndUpdate(
@@ -47,19 +47,17 @@ async function releaseExpiredSessions() {
       );
 
     /*
-     * If another request already expired this session,
-     * do nothing.
+     * If another request already expired this
+     * session, do nothing.
      */
     if (!expiredSession) {
       continue;
     }
 
     /*
-     * Release the quota reservation and record
-     * the expired participant.
+     * Record the expired participant.
      *
-     * reservedCount -1
-     * expiredCount  +1
+     * There is no reservation to release anymore.
      */
     await AssignmentQuota.findOneAndUpdate(
       {
@@ -69,15 +67,9 @@ async function releaseExpiredSessions() {
           expiredSession.condition === "mytwocents"
             ? expiredSession.pattern
             : null,
-
-        // Safety check so reservedCount never becomes negative.
-        reservedCount: {
-          $gt: 0,
-        },
       },
       {
         $inc: {
-          reservedCount: -1,
           expiredCount: 1,
         },
       },
@@ -88,119 +80,89 @@ async function releaseExpiredSessions() {
 export async function reserveAssignment() {
   /*
    * Before assigning a new participant,
-   * free reservations belonging to sessions
-   * whose 40-minute limit has expired.
+   * update any sessions whose 40-minute
+   * limit has expired.
    */
   await releaseExpiredSessions();
 
   /*
-   * Retry because another participant may reserve
-   * the same least-filled quota between our read
-   * and atomic update.
+   * Find experimental cells that still need
+   * valid completed responses.
+   *
+   * A cell remains available until its
+   * completedCount reaches its target.
    */
-  for (
-    let attempt = 0;
-    attempt < 10;
-    attempt += 1
-  ) {
-    const availableQuotas =
-      await AssignmentQuota.find({
-        $expr: {
-          $lt: [
-            "$reservedCount",
-            "$target",
-          ],
-        },
-      }).lean();
+  const availableQuotas =
+    await AssignmentQuota.find({
+      $expr: {
+        $lt: [
+          "$completedCount",
+          "$target",
+        ],
+      },
+    }).lean();
 
-    if (availableQuotas.length === 0) {
-      throw new Error(
-        "NO_ASSIGNMENTS_AVAILABLE",
-      );
-    }
-
-    /*
-     * Find the least-filled quota proportionally.
-     *
-     * Example:
-     *
-     * News:
-     * 5 / 25 = 20%
-     *
-     * P01:
-     * 1 / 5 = 20%
-     *
-     * These are treated as equally filled.
-     */
-    const minimumFillRatio = Math.min(
-      ...availableQuotas.map(
-        (quota) =>
-          quota.reservedCount /
-          quota.target,
-      ),
+  if (availableQuotas.length === 0) {
+    throw new Error(
+      "NO_ASSIGNMENTS_AVAILABLE",
     );
-
-    /*
-     * Keep only quotas with the minimum
-     * current fill ratio.
-     */
-    const leastFilledQuotas =
-      availableQuotas.filter(
-        (quota) =>
-          quota.reservedCount /
-            quota.target ===
-          minimumFillRatio,
-      );
-
-    /*
-     * Randomly choose among tied cells.
-     */
-    const selectedQuota =
-      selectRandom(
-        leastFilledQuotas,
-      );
-
-    /*
-     * Atomically reserve one slot.
-     */
-    const reservedQuota =
-      await AssignmentQuota.findOneAndUpdate(
-        {
-          _id: selectedQuota._id,
-
-          reservedCount: {
-            $lt:
-              selectedQuota.target,
-          },
-        },
-        {
-          $inc: {
-            reservedCount: 1,
-          },
-        },
-        {
-          new: true,
-        },
-      );
-
-    /*
-     * Another participant may have taken
-     * the final available slot.
-     */
-    if (!reservedQuota) {
-      continue;
-    }
-
-    return {
-      topic: reservedQuota.topic,
-      condition:
-        reservedQuota.condition,
-      pattern:
-        reservedQuota.pattern,
-    };
   }
 
-  throw new Error(
-    "ASSIGNMENT_FAILED",
+  /*
+   * Find the least-filled cells proportionally
+   * using valid completed responses.
+   *
+   * Example:
+   *
+   * News:
+   * 5 / 25 = 20%
+   *
+   * P01:
+   * 1 / 5 = 20%
+   *
+   * These are treated as equally filled.
+   */
+  const minimumFillRatio = Math.min(
+    ...availableQuotas.map(
+      (quota) =>
+        quota.completedCount /
+        quota.target,
+    ),
   );
+
+  /*
+   * Keep only cells with the minimum
+   * completion ratio.
+   */
+  const leastFilledQuotas =
+    availableQuotas.filter(
+      (quota) =>
+        quota.completedCount /
+          quota.target ===
+        minimumFillRatio,
+    );
+
+  /*
+   * Randomly choose among tied cells.
+   */
+  const selectedQuota =
+    selectRandom(
+      leastFilledQuotas,
+    );
+
+  /*
+   * Starting the questionnaire does NOT
+   * increase any quota counter.
+   *
+   * completedCount will only increase after
+   * a participant successfully completes the
+   * questionnaire and passes the attention check.
+   */
+  return {
+    topic: selectedQuota.topic,
+    condition:
+      selectedQuota.condition,
+    pattern:
+      selectedQuota.pattern,
+  };
 }

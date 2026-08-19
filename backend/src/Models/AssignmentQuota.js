@@ -32,27 +32,25 @@ const assignmentQuotaSchema = new mongoose.Schema(
       min: 1,
     },
 
-    // Number of participants who were assigned
-    // to this experimental condition.
-    reservedCount: {
-      type: Number,
-      default: 0,
-      min: 0,
-    },
-
-    // Number of participants who actually
-    // completed and submitted the questionnaire.
-    // This is for monitoring only.
+    // Number of valid participants who
+    // completed the questionnaire and
+    // passed the attention check.
     completedCount: {
       type: Number,
       default: 0,
       min: 0,
     },
+
+    // Number of participants who submitted
+    // but failed the attention check.
     incorrectCount: {
       type: Number,
       default: 0,
       min: 0,
     },
+
+    // Number of participants whose session
+    // expired before completing.
     expiredCount: {
       type: Number,
       default: 0,
