@@ -41,17 +41,12 @@ export async function startSession(req, res, next) {
     });
   } catch (error) {
     if (
-      error.message === "NO_ASSIGNMENTS_AVAILABLE"
+      error.message ===
+      "NO_ASSIGNMENTS_CONFIGURED"
     ) {
-      return res.status(409).json({
-        message: "募集人数に達しました。",
-      });
-    }
-
-    if (error.message === "ASSIGNMENT_FAILED") {
       return res.status(503).json({
         message:
-          "参加条件の割り当てに失敗しました。",
+          "実験条件が設定されていません。",
       });
     }
 

@@ -10,7 +10,27 @@ function selectRandom(items) {
 }
 
 /*
- * Find active sessions whose 40-minute limit
+ * Randomly choose one item among those
+ * with the lowest score.
+ */
+function selectLowestScore(
+  items,
+  getScore,
+) {
+  const minimumScore = Math.min(
+    ...items.map(getScore),
+  );
+
+  const lowestItems = items.filter(
+    (item) =>
+      getScore(item) === minimumScore,
+  );
+
+  return selectRandom(lowestItems);
+}
+
+/*
+ * Find active sessions whose time limit
  * has expired and record them as expired.
  */
 async function releaseExpiredSessions() {
@@ -57,14 +77,16 @@ async function releaseExpiredSessions() {
     /*
      * Record the expired participant.
      *
-     * There is no reservation to release anymore.
+     * There is no reservation to release.
      */
     await AssignmentQuota.findOneAndUpdate(
       {
         topic: expiredSession.topic,
-        condition: expiredSession.condition,
+        condition:
+          expiredSession.condition,
         pattern:
-          expiredSession.condition === "mytwocents"
+          expiredSession.condition ===
+          "mytwocents"
             ? expiredSession.pattern
             : null,
       },
@@ -77,92 +99,310 @@ async function releaseExpiredSessions() {
   }
 }
 
+/*
+ * Count currently active, non-expired sessions
+ * for every experimental cell.
+ *
+ * Active participants are used only as a
+ * temporary balancing signal.
+ */
+async function getActiveCounts() {
+  const now = new Date();
+
+  const activeSessions = await Session.aggregate([
+    {
+      $match: {
+        status: "active",
+        expiresAt: {
+          $gt: now,
+        },
+      },
+    },
+    {
+      $group: {
+        _id: {
+          topic: "$topic",
+          condition: "$condition",
+          pattern: "$pattern",
+        },
+        count: {
+          $sum: 1,
+        },
+      },
+    },
+  ]);
+
+  const activeCounts = new Map();
+
+  for (const item of activeSessions) {
+    const key = [
+      item._id.topic,
+      item._id.condition,
+      item._id.pattern ?? "null",
+    ].join("|");
+
+    activeCounts.set(
+      key,
+      item.count,
+    );
+  }
+
+  return activeCounts;
+}
+
+/*
+ * Get the active count for one quota cell.
+ */
+function getActiveCount(
+  quota,
+  activeCounts,
+) {
+  const key = [
+    quota.topic,
+    quota.condition,
+    quota.pattern ?? "null",
+  ].join("|");
+
+  return activeCounts.get(key) ?? 0;
+}
+
 export async function reserveAssignment() {
   /*
-   * Before assigning a new participant,
-   * update any sessions whose 40-minute
-   * limit has expired.
+   * First remove expired sessions from the
+   * active population.
    */
   await releaseExpiredSessions();
 
   /*
-   * Find experimental cells that still need
-   * valid completed responses.
+   * Load every experimental quota.
    *
-   * A cell remains available until its
-   * completedCount reaches its target.
+   * IMPORTANT:
+   * We do NOT filter by completedCount < target.
+   *
+   * Targets are balancing targets, not
+   * hard capacity limits.
    */
-  const availableQuotas =
-    await AssignmentQuota.find({
-      $expr: {
-        $lt: [
-          "$completedCount",
-          "$target",
-        ],
-      },
-    }).lean();
+  const quotas =
+    await AssignmentQuota.find({}).lean();
 
-  if (availableQuotas.length === 0) {
+  if (quotas.length === 0) {
     throw new Error(
-      "NO_ASSIGNMENTS_AVAILABLE",
+      "NO_ASSIGNMENTS_CONFIGURED",
     );
   }
 
   /*
-   * Find the least-filled cells proportionally
-   * using valid completed responses.
-   *
-   * Example:
-   *
-   * News:
-   * 5 / 25 = 20%
-   *
-   * P01:
-   * 1 / 5 = 20%
-   *
-   * These are treated as equally filled.
+   * Count participants who are currently
+   * answering the questionnaire.
    */
-  const minimumFillRatio = Math.min(
-    ...availableQuotas.map(
-      (quota) =>
-        quota.completedCount /
-        quota.target,
+  const activeCounts =
+    await getActiveCounts();
+
+  /*
+   * ==================================================
+   * STEP 1: CHOOSE TOPIC
+   * ==================================================
+   *
+   * Each topic has a desired total equal to the
+   * sum of all quota targets belonging to it.
+   *
+   * Current population is:
+   *
+   * completed valid responses
+   * +
+   * currently active participants
+   */
+  const topicNames = [
+    ...new Set(
+      quotas.map(
+        (quota) => quota.topic,
+      ),
     ),
-  );
+  ];
 
-  /*
-   * Keep only cells with the minimum
-   * completion ratio.
-   */
-  const leastFilledQuotas =
-    availableQuotas.filter(
-      (quota) =>
-        quota.completedCount /
-          quota.target ===
-        minimumFillRatio,
+  const topicStats =
+    topicNames.map((topic) => {
+      const topicQuotas =
+        quotas.filter(
+          (quota) =>
+            quota.topic === topic,
+        );
+
+      const target =
+        topicQuotas.reduce(
+          (sum, quota) =>
+            sum + quota.target,
+          0,
+        );
+
+      const completed =
+        topicQuotas.reduce(
+          (sum, quota) =>
+            sum +
+            quota.completedCount,
+          0,
+        );
+
+      const active =
+        topicQuotas.reduce(
+          (sum, quota) =>
+            sum +
+            getActiveCount(
+              quota,
+              activeCounts,
+            ),
+          0,
+        );
+
+      return {
+        topic,
+        target,
+        completed,
+        active,
+      };
+    });
+
+  const selectedTopic =
+    selectLowestScore(
+      topicStats,
+      (item) =>
+        (item.completed +
+          item.active) /
+        item.target,
     );
 
   /*
-   * Randomly choose among tied cells.
-   */
-  const selectedQuota =
-    selectRandom(
-      leastFilledQuotas,
-    );
-
-  /*
-   * Starting the questionnaire does NOT
-   * increase any quota counter.
+   * ==================================================
+   * STEP 2: CHOOSE CONDITION
+   * ==================================================
    *
-   * completedCount will only increase after
-   * a participant successfully completes the
-   * questionnaire and passes the attention check.
+   * Within the selected topic, compare:
+   *
+   * News
+   *       vs.
+   * MyTwoCents as a WHOLE
+   *
+   * We deliberately do NOT compare News against
+   * each individual MyTwoCents pattern.
    */
+  const topicQuotas =
+    quotas.filter(
+      (quota) =>
+        quota.topic ===
+        selectedTopic.topic,
+    );
+
+  const conditions = [
+    ...new Set(
+      topicQuotas.map(
+        (quota) =>
+          quota.condition,
+      ),
+    ),
+  ];
+
+  const conditionStats =
+    conditions.map((condition) => {
+      const conditionQuotas =
+        topicQuotas.filter(
+          (quota) =>
+            quota.condition ===
+            condition,
+        );
+
+      const target =
+        conditionQuotas.reduce(
+          (sum, quota) =>
+            sum + quota.target,
+          0,
+        );
+
+      const completed =
+        conditionQuotas.reduce(
+          (sum, quota) =>
+            sum +
+            quota.completedCount,
+          0,
+        );
+
+      const active =
+        conditionQuotas.reduce(
+          (sum, quota) =>
+            sum +
+            getActiveCount(
+              quota,
+              activeCounts,
+            ),
+          0,
+        );
+
+      return {
+        condition,
+        target,
+        completed,
+        active,
+      };
+    });
+
+  const selectedCondition =
+    selectLowestScore(
+      conditionStats,
+      (item) =>
+        (item.completed +
+          item.active) /
+        item.target,
+    );
+
+  /*
+   * ==================================================
+   * STEP 3A: NEWS
+   * ==================================================
+   *
+   * News has no conversation pattern.
+   */
+  if (
+    selectedCondition.condition ===
+    "news"
+  ) {
+    return {
+      topic: selectedTopic.topic,
+      condition: "news",
+      pattern: null,
+    };
+  }
+
+  /*
+   * ==================================================
+   * STEP 3B: MYTWOCENTS PATTERN
+   * ==================================================
+   *
+   * Only after MyTwoCents has been selected do
+   * we compare P01-P05.
+   */
+  const patternQuotas =
+    topicQuotas.filter(
+      (quota) =>
+        quota.condition ===
+        "mytwocents",
+    );
+
+  const selectedPattern =
+    selectLowestScore(
+      patternQuotas,
+      (quota) =>
+        (
+          quota.completedCount +
+          getActiveCount(
+            quota,
+            activeCounts,
+          )
+        ) /
+        quota.target,
+    );
+
   return {
-    topic: selectedQuota.topic,
-    condition:
-      selectedQuota.condition,
-    pattern:
-      selectedQuota.pattern,
+    topic: selectedTopic.topic,
+    condition: "mytwocents",
+    pattern: selectedPattern.pattern,
   };
 }
