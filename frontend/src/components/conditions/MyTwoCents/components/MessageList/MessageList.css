@@ -14,14 +14,14 @@
 
 .message-bubble.support {
   justify-self: start;
-  border: 1px solid rgb(189, 215, 244);
-  background: rgb(189, 215, 244);
+  border: 1px solid rgb(204, 226, 251);
+  background: rgb(204, 226, 251);
 }
 
 .message-bubble.oppose {
   justify-self: end;
-  border: 1px solid rgb(251, 191, 191);
-  background: rgb(251, 191, 191);
+  border: 1px solid rgb(248, 197, 197);
+  background: rgb(248, 197, 197);
 }
 
 .message-speaker {
