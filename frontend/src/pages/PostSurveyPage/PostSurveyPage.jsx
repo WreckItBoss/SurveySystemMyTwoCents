@@ -1,4 +1,5 @@
 import PostSurveyQuestions, {
+  furtherExplorationReasonQuestion,
   systemCommentQuestion,
   freeCommentQuestion,
 } from "../../components/Questions/PostSurveyQuestions/PostSurveyQuestions";
@@ -16,19 +17,27 @@ export default function PostSurveyPage({
   onSubmit,
   isSubmitting = false,
 }) {
-  const questions = PostSurveyQuestions(topic, condition);
-
-  const isMyTwoCents = condition === "mytwocents";
-
-  const allRequiredQuestionsAnswered = questions.every(
-    (question) =>
-      answers[question.key] !== null &&
-      answers[question.key] !== undefined &&
-      answers[question.key] !== "",
+  const questions = PostSurveyQuestions(
+    topic,
+    condition,
   );
 
+  const isMyTwoCents =
+    condition === "mytwocents";
+
+  const allRequiredQuestionsAnswered =
+    questions.every(
+      (question) =>
+        answers[question.key] !== null &&
+        answers[question.key] !== undefined &&
+        answers[question.key] !== "",
+    );
+
   function handleSubmit() {
-    if (!allRequiredQuestionsAnswered || isSubmitting) {
+    if (
+      !allRequiredQuestionsAnswered ||
+      isSubmitting
+    ) {
       return;
     }
 
@@ -49,25 +58,61 @@ export default function PostSurveyPage({
 
         <div className="post-survey-page__questions">
           {questions.map((question) => (
-            <QuestionScale
-              key={question.key}
-              label={question.label}
-              options={question.options}
-              value={answers[question.key]}
-              onChange={(value) =>
-                onAnswerChange(question.key, value)
-              }
-              required
-            />
+            <div key={question.key}>
+              <QuestionScale
+                label={question.label}
+                options={question.options}
+                value={answers[question.key]}
+                onChange={(value) =>
+                  onAnswerChange(
+                    question.key,
+                    value,
+                  )
+                }
+                required
+              />
+
+              {question.key ===
+                "furtherExploration" && (
+                <FreeTextArea
+                  label={
+                    furtherExplorationReasonQuestion.label
+                  }
+                  placeholder={
+                    furtherExplorationReasonQuestion.placeholder
+                  }
+                  value={
+                    answers.furtherExplorationReason ??
+                    ""
+                  }
+                  onChange={(value) =>
+                    onAnswerChange(
+                      "furtherExplorationReason",
+                      value,
+                    )
+                  }
+                  maxLength={1000}
+                />
+              )}
+            </div>
           ))}
 
           {isMyTwoCents && (
             <FreeTextArea
-              label={systemCommentQuestion.label}
-              placeholder={systemCommentQuestion.placeholder}
-              value={answers.systemComment ?? ""}
+              label={
+                systemCommentQuestion.label
+              }
+              placeholder={
+                systemCommentQuestion.placeholder
+              }
+              value={
+                answers.systemComment ?? ""
+              }
               onChange={(value) =>
-                onAnswerChange("systemComment", value)
+                onAnswerChange(
+                  "systemComment",
+                  value,
+                )
               }
               maxLength={1000}
             />
@@ -75,10 +120,17 @@ export default function PostSurveyPage({
 
           <FreeTextArea
             label={freeCommentQuestion.label}
-            placeholder={freeCommentQuestion.placeholder}
-            value={answers.freeComment ?? ""}
+            placeholder={
+              freeCommentQuestion.placeholder
+            }
+            value={
+              answers.freeComment ?? ""
+            }
             onChange={(value) =>
-              onAnswerChange("freeComment", value)
+              onAnswerChange(
+                "freeComment",
+                value,
+              )
             }
             maxLength={1000}
           />
@@ -98,10 +150,13 @@ export default function PostSurveyPage({
           onNext={handleSubmit}
           previousDisabled={isSubmitting}
           nextDisabled={
-            !allRequiredQuestionsAnswered || isSubmitting
+            !allRequiredQuestionsAnswered ||
+            isSubmitting
           }
           nextLabel={
-            isSubmitting ? "送信中..." : "回答を送信する"
+            isSubmitting
+              ? "送信中..."
+              : "回答を送信する"
           }
         />
       </section>

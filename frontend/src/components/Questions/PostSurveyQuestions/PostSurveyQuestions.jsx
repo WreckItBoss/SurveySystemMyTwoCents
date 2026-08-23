@@ -49,6 +49,7 @@ export default function createPostSurveyQuestions(topic, condition) {
       label: `${contentLabel}を読むことで、関連する話題や他の記事をさらに調べてみたいという気持ちになりましたか。`,
       options: agreementOptions,
     },
+
   ];
 
   const myTwoCentsQuestions = [
@@ -84,6 +85,12 @@ export default function createPostSurveyQuestions(topic, condition) {
     ...finalQuestions,
   ];
 }
+export const furtherExplorationReasonQuestion = {
+  key: "furtherExplorationReason",
+  label:
+   "この話題について「さらに調べたい」と思った理由、またはそう思わなかった理由をご記入ください。",
+  placeholder: "こちらにご記入ください。",
+};
 
 export const systemCommentQuestion = {
   key: "systemComment",

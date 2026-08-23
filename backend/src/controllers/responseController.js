@@ -29,6 +29,7 @@ export async function createResponse(req, res, next) {
       postNewInformation,
       postPerspectiveComparison,
       postFurtherExploration,
+      postFurtherExplorationReason,
 
       chatbotAppropriateness,
       chatbotTrustworthiness,
@@ -108,6 +109,8 @@ export async function createResponse(req, res, next) {
       postNewInformation,
       postPerspectiveComparison,
       postFurtherExploration,
+      postFurtherExplorationReason:
+        postFurtherExplorationReason ?? "",
 
       chatbotAppropriateness:
         condition === "mytwocents"

@@ -30,6 +30,7 @@ const initialResponses = {
     newInformation: null,
     perspectiveComparison: null,
     furtherExploration: null,
+    furtherExplorationReason: "",
     chatbotAppropriateness: null,
     chatbotTrustworthiness: null,
     chatbotEngagement: null,
@@ -596,6 +597,9 @@ export default function App() {
       postFurtherExploration:
         responses.postSurvey
           .furtherExploration,
+          
+      postFurtherExplorationReason:
+        responses.postSurvey.furtherExplorationReason,
 
       chatbotAppropriateness:
         responses.postSurvey

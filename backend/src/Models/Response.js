@@ -83,6 +83,11 @@ const responseSchema = new mongoose.Schema(
       min: 1,
       max: 5,
     },
+    postFurtherExplorationReason: {
+      type: String,
+      default: "",
+      maxlength: 1000,
+    },
 
     chatbotAppropriateness: {
       type: Number,
