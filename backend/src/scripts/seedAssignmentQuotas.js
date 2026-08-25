@@ -4,46 +4,87 @@ import mongoose from "mongoose";
 import connectDatabase from "../config/database.js";
 import AssignmentQuota from "../Models/AssignmentQuota.js";
 
-const topics = [
-  "nuclearenergy",
-  "selfdrivingcars",
-  "surveillance",
-];
+/*
+ * Temporary News-Only article-selection experiment.
+ *
+ * 5 topics
+ * × 2 articles per topic
+ * = 10 article conditions
+ *
+ * Each article targets 25 valid participants.
+ */
 
-const quotas = [];
-
-for (const topic of topics) {
-  quotas.push({
-    topic,
-    condition: "news",
-    pattern: null,
+const quotas = [
+  {
+    topic: "nuclearenergy",
+    article: "nuclearenergy1",
     target: 25,
-    completedCount: 0,
-    incorrectCount: 0,
-    expiredCount: 0,
-  });
+  },
+  {
+    topic: "nuclearenergy",
+    article: "nuclearenergy2",
+    target: 25,
+  },
 
-  for (
-    let patternNumber = 1;
-    patternNumber <= 5;
-    patternNumber += 1
-  ) {
-    quotas.push({
-      topic,
-      condition: "mytwocents",
-      pattern: `P0${patternNumber}`,
-      target: 5,
-      completedCount: 0,
-      incorrectCount: 0,
-      expiredCount: 0,
-    });
-  }
-}
+  {
+    topic: "immigration",
+    article: "immigration1",
+    target: 25,
+  },
+  {
+    topic: "immigration",
+    article: "immigration2",
+    target: 25,
+  },
+
+  {
+    topic: "usingballatpark",
+    article: "usingballatpark1",
+    target: 25,
+  },
+  {
+    topic: "usingballatpark",
+    article: "usingballatpark2",
+    target: 25,
+  },
+
+  {
+    topic: "casinoir",
+    article: "casinoir1",
+    target: 25,
+  },
+  {
+    topic: "casinoir",
+    article: "casinoir2",
+    target: 25,
+  },
+
+  {
+    topic: "decreasericeprice",
+    article: "decreasericeprice1",
+    target: 25,
+  },
+  {
+    topic: "decreasericeprice",
+    article: "decreasericeprice2",
+    target: 25,
+  },
+].map((quota) => ({
+  ...quota,
+  completedCount: 0,
+  incorrectCount: 0,
+  expiredCount: 0,
+}));
 
 async function seedAssignmentQuotas() {
   try {
     await connectDatabase();
 
+    /*
+     * WARNING:
+     * This deletes all existing quota documents
+     * before creating the new experiment quotas.
+     */
     await AssignmentQuota.deleteMany({});
 
     await AssignmentQuota.insertMany(quotas);
@@ -51,8 +92,17 @@ async function seedAssignmentQuotas() {
     console.log(
       `Inserted ${quotas.length} assignment quota documents.`,
     );
+
+    console.log(
+      `Total target: ${quotas.reduce(
+        (sum, quota) => sum + quota.target,
+        0,
+      )} valid participants.`,
+    );
   } catch (error) {
-    console.error("Failed to seed assignment quotas:");
+    console.error(
+      "Failed to seed assignment quotas:",
+    );
     console.error(error);
   } finally {
     await mongoose.disconnect();
