@@ -56,6 +56,7 @@ async function exportResponsesToCsv() {
       "postNewInformation",
       "postPerspectiveComparison",
       "postFurtherExploration",
+      "postFurtherExplorationReason",
 
       "chatbotAppropriateness",
       "chatbotTrustworthiness",
