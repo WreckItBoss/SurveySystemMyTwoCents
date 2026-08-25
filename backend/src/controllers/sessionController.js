@@ -6,7 +6,10 @@ import { reserveAssignment } from "../services/assignmentService.js";
 const topicLabels = {
   nuclearenergy: "原子力発電",
   selfdrivingcars: "自動運転",
-  surveillance: "超監視時代",
+  immigration: "移民受け入れ",
+  usingballatpark: "公園でのボール遊び",
+  casinoir: "カジノ・IR",
+  decreasericeprice: "コメ価格の値下がり",
 };
 
 export async function startSession(req, res, next) {
@@ -24,8 +27,9 @@ export async function startSession(req, res, next) {
     await Session.create({
       sessionId,
       topic: assignment.topic,
-      condition: assignment.condition,
-      pattern: assignment.pattern,
+      article: assignment.article,
+      condition: "news",
+      pattern: null,
       status: "active",
       startedAt: now,
       expiresAt,
@@ -35,8 +39,9 @@ export async function startSession(req, res, next) {
       sessionId,
       topic: assignment.topic,
       topicLabel: topicLabels[assignment.topic],
-      condition: assignment.condition,
-      pattern: assignment.pattern,
+      article: assignment.article,
+      condition: "news",
+      pattern: null,
       expiresAt,
     });
   } catch (error) {
@@ -94,22 +99,13 @@ export async function expireSession(
       });
     }
 
-    const normalizedPattern =
-      expiredSession.condition === "mytwocents"
-        ? expiredSession.pattern
-        : null;
-
     /*
-     * Record the expired participant.
-     *
-     * There is no reserved quota slot
-     * to release anymore.
+     * Record the expired participant for the
+     * exact article they were assigned.
      */
     await AssignmentQuota.findOneAndUpdate(
       {
-        topic: expiredSession.topic,
-        condition: expiredSession.condition,
-        pattern: normalizedPattern,
+        article: expiredSession.article,
       },
       {
         $inc: {
