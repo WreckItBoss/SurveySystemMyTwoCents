@@ -5,7 +5,6 @@ import { reserveAssignment } from "../services/assignmentService.js";
 
 const topicLabels = {
   nuclearenergy: "原子力発電",
-  selfdrivingcars: "自動運転",
   immigration: "移民受け入れ",
   usingballatpark: "公園でのボール遊び",
   casinoir: "カジノ・IR",

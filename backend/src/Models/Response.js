@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+
 const responseSchema = new mongoose.Schema(
   {
     sessionId: {
@@ -13,8 +14,36 @@ const responseSchema = new mongoose.Schema(
       required: true,
       enum: [
         "nuclearenergy",
-        "selfdrivingcars",
-        "surveillance",
+        "immigration",
+        "usingballatpark",
+        "casinoir",
+        "decreasericeprice",
+      ],
+    },
+
+    /*
+     * Exact news article shown to the participant.
+     *
+     * Examples:
+     * nuclearenergy1
+     * nuclearenergy2
+     * immigration1
+     * immigration2
+     */
+    article: {
+      type: String,
+      required: true,
+      enum: [
+        "nuclearenergy1",
+        "nuclearenergy2",
+        "immigration1",
+        "immigration2",
+        "usingballatpark1",
+        "usingballatpark2",
+        "casinoir1",
+        "casinoir2",
+        "decreasericeprice1",
+        "decreasericeprice2",
       ],
     },
 
@@ -83,6 +112,7 @@ const responseSchema = new mongoose.Schema(
       min: 1,
       max: 5,
     },
+
     postFurtherExplorationReason: {
       type: String,
       default: "",
