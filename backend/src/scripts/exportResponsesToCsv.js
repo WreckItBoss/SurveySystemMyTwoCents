@@ -43,6 +43,7 @@ async function exportResponsesToCsv() {
     const columns = [
       "sessionId",
       "topic",
+      "article",
       "condition",
       "pattern",
 
