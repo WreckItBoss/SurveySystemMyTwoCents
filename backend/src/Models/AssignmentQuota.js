@@ -7,8 +7,8 @@ const assignmentQuotaSchema = new mongoose.Schema(
       required: true,
       enum: [
         "nuclearenergy",
-        "usingballatpark",
         "immigration",
+        "usingballatpark",
         "casinoir",
         "decreasericeprice",
       ],
