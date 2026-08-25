@@ -7,25 +7,47 @@ const assignmentQuotaSchema = new mongoose.Schema(
       required: true,
       enum: [
         "nuclearenergy",
-        "selfdrivingcars",
-        "surveillance",
+        "usingballatpark",
+        "immigration",
+        "casinoir",
+        "decreasericeprice",
       ],
     },
 
-    condition: {
+    /*
+     * Specific news article assigned within the topic.
+     *
+     * Each topic has two articles:
+     *   nuclearenergy1
+     *   nuclearenergy2
+     *   usingballatpark1
+     *   usingballatpark2
+     *   ...
+     */
+    article: {
       type: String,
       required: true,
       enum: [
-        "news",
-        "mytwocents",
+        "nuclearenergy1",
+        "nuclearenergy2",
+        "usingballatpark1",
+        "usingballatpark2",
+        "immigration1",
+        "immigration2",
+        "casinoir1",
+        "casinoir2",
+        "decreasericeprice1",
+        "decreasericeprice2",
       ],
     },
 
-    pattern: {
-      type: String,
-      default: null,
-    },
-
+    /*
+     * Number of valid completed participants
+     * required for this article.
+     *
+     * For this experiment this will be 25
+     * for every article.
+     */
     target: {
       type: Number,
       required: true,
@@ -62,11 +84,12 @@ const assignmentQuotaSchema = new mongoose.Schema(
   },
 );
 
+/*
+ * Each article has exactly one quota document.
+ */
 assignmentQuotaSchema.index(
   {
-    topic: 1,
-    condition: 1,
-    pattern: 1,
+    article: 1,
   },
   {
     unique: true,
