@@ -4,73 +4,54 @@ import mongoose from "mongoose";
 import connectDatabase from "../config/database.js";
 import AssignmentQuota from "../Models/AssignmentQuota.js";
 
-/*
- * Temporary News-Only article-selection experiment.
- *
- * 5 topics
- * × 2 articles per topic
- * = 10 article conditions
- *
- * Each article targets 25 valid participants.
- */
-
 const quotas = [
   {
     topic: "nuclearenergy",
     article: "nuclearenergy1",
-    target: 25,
   },
   {
     topic: "nuclearenergy",
     article: "nuclearenergy2",
-    target: 25,
   },
 
   {
     topic: "immigration",
     article: "immigration1",
-    target: 25,
   },
   {
     topic: "immigration",
     article: "immigration2",
-    target: 25,
   },
 
   {
     topic: "usingballatpark",
     article: "usingballatpark1",
-    target: 25,
   },
   {
     topic: "usingballatpark",
     article: "usingballatpark2",
-    target: 25,
   },
 
   {
     topic: "casinoir",
     article: "casinoir1",
-    target: 25,
   },
   {
     topic: "casinoir",
     article: "casinoir2",
-    target: 25,
   },
 
   {
     topic: "decreasericeprice",
     article: "decreasericeprice1",
-    target: 25,
   },
   {
     topic: "decreasericeprice",
     article: "decreasericeprice2",
-    target: 25,
   },
 ].map((quota) => ({
   ...quota,
+  target: 25,
   completedCount: 0,
   incorrectCount: 0,
   expiredCount: 0,
@@ -81,12 +62,29 @@ async function seedAssignmentQuotas() {
     await connectDatabase();
 
     /*
-     * WARNING:
-     * This deletes all existing quota documents
-     * before creating the new experiment quotas.
+     * Remove all old quota documents.
      */
     await AssignmentQuota.deleteMany({});
 
+    /*
+     * Synchronize MongoDB indexes with the
+     * CURRENT AssignmentQuota schema.
+     *
+     * This removes the old:
+     *
+     * topic_1_condition_1_pattern_1
+     *
+     * index and creates/keeps the new:
+     *
+     * article_1
+     *
+     * unique index.
+     */
+    await AssignmentQuota.syncIndexes();
+
+    /*
+     * Insert the 10 article quotas.
+     */
     await AssignmentQuota.insertMany(quotas);
 
     console.log(

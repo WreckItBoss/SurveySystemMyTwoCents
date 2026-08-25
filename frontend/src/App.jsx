@@ -567,6 +567,9 @@ export default function App() {
       topic:
         assignment.topic,
 
+      article:
+        assignment.article,
+
       condition:
         assignment.condition,
 
