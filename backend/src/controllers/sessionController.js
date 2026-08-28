@@ -5,17 +5,20 @@ import { reserveAssignment } from "../services/assignmentService.js";
 
 const topicLabels = {
   nuclearenergy: "原子力発電",
-  immigration: "移民受け入れ",
-  usingballatpark: "公園でのボール遊び",
   casinoir: "カジノ・IR",
-  decreasericeprice: "コメ価格の値下がり",
 };
 
-export async function startSession(req, res, next) {
+export async function startSession(
+  req,
+  res,
+  next,
+) {
   try {
-    const assignment = await reserveAssignment();
+    const assignment =
+      await reserveAssignment();
 
-    const sessionId = crypto.randomUUID();
+    const sessionId =
+      crypto.randomUUID();
 
     const now = new Date();
 
@@ -23,12 +26,22 @@ export async function startSession(req, res, next) {
       now.getTime() + 40 * 60 * 1000,
     );
 
+    /*
+     * Store the exact experimental cell
+     * assigned to this participant.
+     *
+     * Example:
+     *   topic: nuclearenergy
+     *   article: nuclearenergy1
+     *   condition: mytwocents
+     *   pattern: P03
+     */
     await Session.create({
       sessionId,
       topic: assignment.topic,
       article: assignment.article,
-      condition: "news",
-      pattern: null,
+      condition: assignment.condition,
+      pattern: assignment.pattern,
       status: "active",
       startedAt: now,
       expiresAt,
@@ -37,10 +50,11 @@ export async function startSession(req, res, next) {
     return res.status(201).json({
       sessionId,
       topic: assignment.topic,
-      topicLabel: topicLabels[assignment.topic],
+      topicLabel:
+        topicLabels[assignment.topic],
       article: assignment.article,
-      condition: "news",
-      pattern: null,
+      condition: assignment.condition,
+      pattern: assignment.pattern,
       expiresAt,
     });
   } catch (error) {
@@ -67,10 +81,8 @@ export async function expireSession(
     const { sessionId } = req.params;
 
     /*
-     * Only expire a session that is still active.
-     *
-     * If it was already completed or expired,
-     * it must not be counted again.
+     * Atomically change the session from
+     * active -> expired.
      */
     const expiredSession =
       await Session.findOneAndUpdate(
@@ -89,8 +101,8 @@ export async function expireSession(
       );
 
     /*
-     * If the session was already completed/expired
-     * or doesn't exist, do nothing.
+     * The session may already have been
+     * completed or expired.
      */
     if (!expiredSession) {
       return res.status(200).json({
@@ -99,12 +111,13 @@ export async function expireSession(
     }
 
     /*
-     * Record the expired participant for the
-     * exact article they were assigned.
+     * Increment the expired count for the
+     * exact article + pattern cell.
      */
     await AssignmentQuota.findOneAndUpdate(
       {
         article: expiredSession.article,
+        pattern: expiredSession.pattern,
       },
       {
         $inc: {
