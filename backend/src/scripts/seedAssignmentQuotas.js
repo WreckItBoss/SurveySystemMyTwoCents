@@ -4,65 +4,54 @@ import mongoose from "mongoose";
 import connectDatabase from "../config/database.js";
 import AssignmentQuota from "../Models/AssignmentQuota.js";
 
-const quotas = [
+const patterns = [
+  "P01",
+  "P02",
+  "P03",
+  "P04",
+  "P05",
+];
+
+const articles = [
   {
     topic: "nuclearenergy",
     article: "nuclearenergy1",
   },
   {
-    topic: "nuclearenergy",
-    article: "nuclearenergy2",
-  },
-
-  {
-    topic: "immigration",
-    article: "immigration1",
-  },
-  {
-    topic: "immigration",
-    article: "immigration2",
-  },
-
-  {
-    topic: "usingballatpark",
-    article: "usingballatpark1",
-  },
-  {
-    topic: "usingballatpark",
-    article: "usingballatpark2",
-  },
-
-  {
-    topic: "casinoir",
-    article: "casinoir1",
-  },
-  {
     topic: "casinoir",
     article: "casinoir2",
   },
+];
 
-  {
-    topic: "decreasericeprice",
-    article: "decreasericeprice1",
-  },
-  {
-    topic: "decreasericeprice",
-    article: "decreasericeprice2",
-  },
-].map((quota) => ({
-  ...quota,
-  target: 25,
-  completedCount: 0,
-  incorrectCount: 0,
-  expiredCount: 0,
-}));
+/*
+ * Create:
+ *
+ * nuclearenergy1 × P01-P05
+ * casinoir2      × P01-P05
+ *
+ * 10 experimental cells total.
+ */
+const quotas = articles.flatMap(
+  ({ topic, article }) =>
+    patterns.map((pattern) => ({
+      topic,
+      article,
+      condition: "mytwocents",
+      pattern,
+      target: 5,
+      completedCount: 0,
+      incorrectCount: 0,
+      expiredCount: 0,
+    })),
+);
 
 async function seedAssignmentQuotas() {
   try {
     await connectDatabase();
 
     /*
-     * Remove all old quota documents.
+     * Remove quota documents from the
+     * previous News Only experiment.
      */
     await AssignmentQuota.deleteMany({});
 
@@ -70,22 +59,24 @@ async function seedAssignmentQuotas() {
      * Synchronize MongoDB indexes with the
      * CURRENT AssignmentQuota schema.
      *
-     * This removes the old:
+     * The previous News Only experiment used:
      *
-     * topic_1_condition_1_pattern_1
+     *   article_1
      *
-     * index and creates/keeps the new:
+     * The current experiment uses:
      *
-     * article_1
+     *   article_1_pattern_1
      *
-     * unique index.
+     * as the unique experimental-cell index.
      */
     await AssignmentQuota.syncIndexes();
 
     /*
-     * Insert the 10 article quotas.
+     * Insert the 10 article + pattern quotas.
      */
-    await AssignmentQuota.insertMany(quotas);
+    await AssignmentQuota.insertMany(
+      quotas,
+    );
 
     console.log(
       `Inserted ${quotas.length} assignment quota documents.`,
@@ -93,14 +84,25 @@ async function seedAssignmentQuotas() {
 
     console.log(
       `Total target: ${quotas.reduce(
-        (sum, quota) => sum + quota.target,
+        (sum, quota) =>
+          sum + quota.target,
         0,
       )} valid participants.`,
+    );
+
+    console.table(
+      quotas.map((quota) => ({
+        topic: quota.topic,
+        article: quota.article,
+        pattern: quota.pattern,
+        target: quota.target,
+      })),
     );
   } catch (error) {
     console.error(
       "Failed to seed assignment quotas:",
     );
+
     console.error(error);
   } finally {
     await mongoose.disconnect();

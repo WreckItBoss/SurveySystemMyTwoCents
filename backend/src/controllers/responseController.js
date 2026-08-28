@@ -28,7 +28,12 @@ export async function createResponse(req, res, next) {
       postFurtherExploration,
       postFurtherExplorationReason,
 
+      chatbotAppropriateness,
+      chatbotTrustworthiness,
+      chatbotEngagement,
+
       postStance,
+      systemComment,
       freeComment,
 
       keywordAnswer,
@@ -78,11 +83,10 @@ export async function createResponse(req, res, next) {
      * GET ASSIGNMENT FROM SESSION
      * ==================================================
      *
-     * Do NOT trust topic/article information
-     * sent by the frontend.
+     * Do NOT trust topic/article/condition/pattern
+     * information sent by the frontend.
      *
-     * The Session is the source of truth for
-     * which article this participant received.
+     * Session is the source of truth.
      */
 
     const activeSession =
@@ -98,14 +102,17 @@ export async function createResponse(req, res, next) {
       });
     }
 
-    /*
-     * Every new experimental session should
-     * have an article.
-     */
     if (!activeSession.article) {
       return res.status(500).json({
         message:
           "The questionnaire session does not have an assigned article.",
+      });
+    }
+
+    if (!activeSession.pattern) {
+      return res.status(500).json({
+        message:
+          "The questionnaire session does not have an assigned pattern.",
       });
     }
 
@@ -115,13 +122,11 @@ export async function createResponse(req, res, next) {
     const article =
       activeSession.article;
 
-    /*
-     * This temporary experiment is always
-     * News Only.
-     */
-    const condition = "news";
+    const condition =
+      activeSession.condition;
 
-    const pattern = null;
+    const pattern =
+      activeSession.pattern;
 
     /*
      * ==================================================
@@ -182,16 +187,16 @@ export async function createResponse(req, res, next) {
           "",
 
         /*
-         * There is no chatbot in this
-         * temporary News Only experiment.
+         * MyTwoCents-specific questions.
          */
-        chatbotAppropriateness: null,
-        chatbotTrustworthiness: null,
-        chatbotEngagement: null,
+        chatbotAppropriateness,
+        chatbotTrustworthiness,
+        chatbotEngagement,
 
         postStance,
 
-        systemComment: "",
+        systemComment:
+          systemComment ?? "",
 
         freeComment:
           freeComment ?? "",
@@ -210,9 +215,6 @@ export async function createResponse(req, res, next) {
      * ==================================================
      * COMPLETE SESSION
      * ==================================================
-     *
-     * Only an active session may transition
-     * into a completed state.
      */
 
     const completedSession =
@@ -237,13 +239,8 @@ export async function createResponse(req, res, next) {
       );
 
     /*
-     * It is possible, although unlikely, that
-     * the session expired between our initial
-     * check and this update.
-     *
-     * If that happened, remove the response
-     * we just created so the database remains
-     * consistent.
+     * The session could have expired between
+     * the initial lookup and this update.
      */
     if (!completedSession) {
       await Response.deleteOne({
@@ -258,10 +255,11 @@ export async function createResponse(req, res, next) {
 
     /*
      * ==================================================
-     * UPDATE ARTICLE QUOTA
+     * UPDATE ARTICLE + PATTERN QUOTA
      * ==================================================
      *
-     * Each article is now its own quota cell.
+     * Each article + pattern combination
+     * is one experimental cell.
      *
      * Correct:
      *   completedCount +1
@@ -275,6 +273,9 @@ export async function createResponse(req, res, next) {
         {
           article:
             completedSession.article,
+
+          pattern:
+            completedSession.pattern,
         },
         {
           $inc: {
@@ -287,6 +288,9 @@ export async function createResponse(req, res, next) {
         {
           article:
             completedSession.article,
+
+          pattern:
+            completedSession.pattern,
         },
         {
           $inc: {
