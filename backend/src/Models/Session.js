@@ -13,58 +13,36 @@ const sessionSchema = new mongoose.Schema(
       required: true,
       enum: [
         "nuclearenergy",
-        "usingballatpark",
-        "immigration",
         "casinoir",
-        "decreasericeprice",
       ],
     },
 
-    /*
-     * This temporary experiment is News Only.
-     *
-     * We keep condition in the Session model
-     * because the existing frontend/backend
-     * already uses it.
-     */
     condition: {
       type: String,
       required: true,
-      enum: ["news"],
-      default: "news",
+      enum: ["mytwocents"],
+      default: "mytwocents",
     },
 
-    /*
-     * Exact article shown to the participant.
-     */
     article: {
       type: String,
       required: true,
       enum: [
         "nuclearenergy1",
-        "nuclearenergy2",
-        "usingballatpark1",
-        "usingballatpark2",
-        "immigration1",
-        "immigration2",
-        "casinoir1",
         "casinoir2",
-        "decreasericeprice1",
-        "decreasericeprice2",
       ],
     },
 
-    /*
-     * Kept temporarily for compatibility with
-     * the existing application.
-     *
-     * Since there is no MyTwoCents condition
-     * in this experiment, this will always
-     * remain null.
-     */
     pattern: {
       type: String,
-      default: null,
+      required: true,
+      enum: [
+        "P01",
+        "P02",
+        "P03",
+        "P04",
+        "P05",
+      ],
     },
 
     status: {
@@ -95,9 +73,7 @@ const sessionSchema = new mongoose.Schema(
       default: null,
     },
   },
-  {
-    timestamps: true,
-  },
+  { timestamps: true },
 );
 
 const Session = mongoose.model(
