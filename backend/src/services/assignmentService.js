@@ -30,6 +30,17 @@ function selectLowestScore(
 }
 
 /*
+ * Create a unique key for one experimental cell.
+ *
+ * Example:
+ *   casinoir2 + P01
+ *   nuclearenergy1 + P03
+ */
+function getCellKey(article, pattern) {
+  return `${article}:${pattern}`;
+}
+
+/*
  * Find active sessions whose time limit
  * has expired and record them as expired.
  */
@@ -76,11 +87,12 @@ async function releaseExpiredSessions() {
 
     /*
      * Record the expired participant for the
-     * exact article they were assigned.
+     * exact article + pattern cell.
      */
     await AssignmentQuota.findOneAndUpdate(
       {
         article: expiredSession.article,
+        pattern: expiredSession.pattern,
       },
       {
         $inc: {
@@ -93,7 +105,7 @@ async function releaseExpiredSessions() {
 
 /*
  * Count currently active, non-expired sessions
- * for each article.
+ * for each article + pattern cell.
  *
  * Active participants are used only as a
  * temporary balancing signal.
@@ -109,11 +121,15 @@ async function getActiveCounts() {
           expiresAt: {
             $gt: now,
           },
+          condition: "mytwocents",
         },
       },
       {
         $group: {
-          _id: "$article",
+          _id: {
+            article: "$article",
+            pattern: "$pattern",
+          },
           count: {
             $sum: 1,
           },
@@ -125,15 +141,23 @@ async function getActiveCounts() {
 
   for (const item of activeSessions) {
     /*
-     * Ignore old sessions that do not have
-     * an article field.
+     * Ignore old/incomplete sessions that
+     * do not have article or pattern.
      */
-    if (!item._id) {
+    if (
+      !item._id?.article ||
+      !item._id?.pattern
+    ) {
       continue;
     }
 
+    const key = getCellKey(
+      item._id.article,
+      item._id.pattern,
+    );
+
     activeCounts.set(
-      item._id,
+      key,
       item.count,
     );
   }
@@ -143,15 +167,18 @@ async function getActiveCounts() {
 
 /*
  * Get the active participant count
- * for a specific article.
+ * for a specific article + pattern cell.
  */
 function getActiveCount(
   quota,
   activeCounts,
 ) {
-  return (
-    activeCounts.get(quota.article) ?? 0
+  const key = getCellKey(
+    quota.article,
+    quota.pattern,
   );
+
+  return activeCounts.get(key) ?? 0;
 }
 
 export async function reserveAssignment() {
@@ -162,7 +189,9 @@ export async function reserveAssignment() {
   await releaseExpiredSessions();
 
   /*
-   * Load all 10 article quotas.
+   * Load all 10 article + pattern quotas.
+   *
+   * 2 articles × 5 patterns = 10 cells.
    *
    * IMPORTANT:
    * We deliberately do NOT filter using
@@ -170,11 +199,6 @@ export async function reserveAssignment() {
    *
    * The target is used for balancing rather
    * than as a hard reservation wall.
-   *
-   * This means participants who are already
-   * entering/completing the questionnaire
-   * are not blocked simply because another
-   * participant finishes first.
    */
   const quotas =
     await AssignmentQuota.find({}).lean();
@@ -187,17 +211,18 @@ export async function reserveAssignment() {
 
   /*
    * Count participants who are currently
-   * answering each article.
+   * answering each article + pattern cell.
    */
   const activeCounts =
     await getActiveCounts();
 
   /*
    * ==================================================
-   * CHOOSE ARTICLE
+   * CHOOSE ARTICLE + PATTERN
    * ==================================================
    *
-   * Each article is now one experimental cell.
+   * Each article + pattern combination is
+   * one experimental cell.
    *
    * Balancing score:
    *
@@ -207,23 +232,23 @@ export async function reserveAssignment() {
    *
    * Example:
    *
-   * nuclearenergy1:
-   *   completed = 10
-   *   active    = 2
-   *   target    = 25
-   *
-   *   score = 12 / 25 = 0.48
-   *
-   * casinoir2:
-   *   completed = 8
+   * casinoir2 / P01:
+   *   completed = 3
    *   active    = 1
-   *   target    = 25
+   *   target    = 5
    *
-   *   score = 9 / 25 = 0.36
+   *   score = 4 / 5 = 0.8
    *
-   * casinoir2 therefore has higher priority.
+   * casinoir2 / P02:
+   *   completed = 2
+   *   active    = 0
+   *   target    = 5
    *
-   * If multiple articles have the same lowest
+   *   score = 2 / 5 = 0.4
+   *
+   * P02 therefore has higher priority.
+   *
+   * If multiple cells have the same lowest
    * score, randomly choose between them.
    */
   const selectedQuota =
@@ -241,17 +266,13 @@ export async function reserveAssignment() {
     );
 
   /*
-   * Every participant in this temporary
-   * experiment receives the News Only
-   * condition.
-   *
-   * pattern remains null for compatibility
-   * with the existing application.
+   * Every participant in this experiment
+   * receives the MyTwoCents condition.
    */
   return {
     topic: selectedQuota.topic,
     article: selectedQuota.article,
-    condition: "news",
-    pattern: null,
+    condition: "mytwocents",
+    pattern: selectedQuota.pattern,
   };
 }
