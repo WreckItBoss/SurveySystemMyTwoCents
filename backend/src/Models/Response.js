@@ -14,51 +14,38 @@ const responseSchema = new mongoose.Schema(
       required: true,
       enum: [
         "nuclearenergy",
-        "immigration",
-        "usingballatpark",
         "casinoir",
-        "decreasericeprice",
       ],
     },
 
     /*
      * Exact news article shown to the participant.
-     *
-     * Examples:
-     * nuclearenergy1
-     * nuclearenergy2
-     * immigration1
-     * immigration2
      */
     article: {
       type: String,
       required: true,
       enum: [
         "nuclearenergy1",
-        "nuclearenergy2",
-        "immigration1",
-        "immigration2",
-        "usingballatpark1",
-        "usingballatpark2",
-        "casinoir1",
         "casinoir2",
-        "decreasericeprice1",
-        "decreasericeprice2",
       ],
     },
 
     condition: {
       type: String,
       required: true,
-      enum: [
-        "news",
-        "mytwocents",
-      ],
+      enum: ["mytwocents"],
     },
 
     pattern: {
       type: String,
-      default: null,
+      required: true,
+      enum: [
+        "P01",
+        "P02",
+        "P03",
+        "P04",
+        "P05",
+      ],
     },
 
     ageGroup: {
@@ -121,21 +108,21 @@ const responseSchema = new mongoose.Schema(
 
     chatbotAppropriateness: {
       type: Number,
-      default: null,
+      required: true,
       min: 1,
       max: 5,
     },
 
     chatbotTrustworthiness: {
       type: Number,
-      default: null,
+      required: true,
       min: 1,
       max: 5,
     },
 
     chatbotEngagement: {
       type: Number,
-      default: null,
+      required: true,
       min: 1,
       max: 5,
     },
@@ -151,12 +138,14 @@ const responseSchema = new mongoose.Schema(
       type: String,
       default: "",
       trim: true,
+      maxlength: 1000,
     },
 
     freeComment: {
       type: String,
       default: "",
       trim: true,
+      maxlength: 1000,
     },
 
     keywordAnswer: {
