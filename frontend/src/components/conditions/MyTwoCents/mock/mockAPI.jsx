@@ -1,6 +1,5 @@
 import nuclearArticle from "../newsarticle/NuclearEnergy.html?raw";
-import selfDrivingArticle from "../newsarticle/SelfDrivingCars.html?raw";
-import surveillanceArticle from "../newsarticle/Surveillance.html?raw";
+import casinoArticle from "../newsarticle/CasinoIR.html?raw";
 
 import nuclearPattern1 from "../conversation/NuclearEnergy/pattern1.js";
 import nuclearPattern2 from "../conversation/NuclearEnergy/pattern2.js";
@@ -8,22 +7,50 @@ import nuclearPattern3 from "../conversation/NuclearEnergy/pattern3.js";
 import nuclearPattern4 from "../conversation/NuclearEnergy/pattern4.js";
 import nuclearPattern5 from "../conversation/NuclearEnergy/pattern5.js";
 
-import selfDrivingPattern1 from "../conversation/SelfDrivingCars/pattern1.js";
-import selfDrivingPattern2 from "../conversation/SelfDrivingCars/pattern2.js";
-import selfDrivingPattern3 from "../conversation/SelfDrivingCars/pattern3.js";
-import selfDrivingPattern4 from "../conversation/SelfDrivingCars/pattern4.js";
-import selfDrivingPattern5 from "../conversation/SelfDrivingCars/pattern5.js";
+import casinoPattern1 from "../conversation/CasinoIR/pattern1.js";
+import casinoPattern2 from "../conversation/CasinoIR/pattern2.js";
+import casinoPattern3 from "../conversation/CasinoIR/pattern3.js";
+import casinoPattern4 from "../conversation/CasinoIR/pattern4.js";
+import casinoPattern5 from "../conversation/CasinoIR/pattern5.js";
 
-import surveillancePattern1 from "../conversation/Surveillance/pattern1.js";
-import surveillancePattern2 from "../conversation/Surveillance/pattern2.js";
-import surveillancePattern3 from "../conversation/Surveillance/pattern3.js";
-import surveillancePattern4 from "../conversation/Surveillance/pattern4.js";
-import surveillancePattern5 from "../conversation/Surveillance/pattern5.js";
-
-const MOCK_CONFIG = {
-  nuclearenergy: {
+/*
+ * ==================================================
+ * ARTICLE CONFIGURATION
+ * ==================================================
+ *
+ * The backend assigns the exact article ID.
+ *
+ * Only these two articles are used in the
+ * current experiment.
+ */
+const ARTICLE_CONFIG = {
+  nuclearenergy1: {
     articleHtml: nuclearArticle,
     topicLabel: "原子力発電",
+  },
+
+  casinoir2: {
+    articleHtml: casinoArticle,
+    topicLabel: "カジノ・IR",
+  },
+};
+
+/*
+ * ==================================================
+ * CONVERSATION CONFIGURATION
+ * ==================================================
+ *
+ * Conversations are selected using:
+ *
+ *   topic + pattern
+ *
+ * Example:
+ *   casinoir + P03
+ */
+const CONVERSATION_CONFIG = {
+  nuclearenergy: {
+    topicLabel: "原子力発電",
+
     conversations: {
       P01: nuclearPattern1,
       P02: nuclearPattern2,
@@ -33,54 +60,33 @@ const MOCK_CONFIG = {
     },
   },
 
-  selfdrivingcars: {
-    articleHtml: selfDrivingArticle,
-    topicLabel: "自動運転",
-    conversations: {
-      P01: selfDrivingPattern1,
-      P02: selfDrivingPattern2,
-      P03: selfDrivingPattern3,
-      P04: selfDrivingPattern4,
-      P05: selfDrivingPattern5,
-    },
-  },
+  casinoir: {
+    topicLabel: "カジノ・IR",
 
-  surveillance: {
-    articleHtml: surveillanceArticle,
-    topicLabel: "超監視時代",
     conversations: {
-      P01: surveillancePattern1,
-      P02: surveillancePattern2,
-      P03: surveillancePattern3,
-      P04: surveillancePattern4,
-      P05: surveillancePattern5,
+      P01: casinoPattern1,
+      P02: casinoPattern2,
+      P03: casinoPattern3,
+      P04: casinoPattern4,
+      P05: casinoPattern5,
     },
   },
 };
 
-function getSelectedConfig(topic, pattern) {
-  const topicConfig = MOCK_CONFIG[topic];
+/*
+ * ==================================================
+ * ARTICLE
+ * ==================================================
+ */
+export async function getArticle(articleId) {
+  const config =
+    ARTICLE_CONFIG[articleId];
 
-  if (!topicConfig) {
-    throw new Error(`Invalid or missing topic: ${topic}`);
-  }
-
-  const conversation = topicConfig.conversations[pattern];
-
-  if (!conversation) {
+  if (!config) {
     throw new Error(
-      `Invalid or missing conversation pattern: ${pattern}`,
+      `Invalid or missing article: ${articleId}`,
     );
   }
-
-  return {
-    ...topicConfig,
-    conversation,
-  };
-}
-
-export async function getArticle(topic, pattern) {
-  const config = getSelectedConfig(topic, pattern);
 
   const html = config.articleHtml;
 
@@ -90,27 +96,37 @@ export async function getArticle(topic, pattern) {
   );
 
   const title =
-    doc.querySelector("header h1")?.textContent.trim() ??
+    doc
+      .querySelector("header h1")
+      ?.textContent.trim() ??
     "Untitled";
 
   const metaText =
-    doc.querySelector(".meta")?.textContent.trim() ?? "";
+    doc
+      .querySelector(".meta")
+      ?.textContent.trim() ??
+    "";
 
   const parts = metaText
     .split("・")
     .map((part) => part.trim());
 
-  const source = parts[0] || "";
-  const date = parts[2] || null;
+  const source =
+    parts[0] || "";
 
-  const articleEl = doc.querySelector("article");
+  const date =
+    parts[2] || null;
 
-  const contentHtml = articleEl
-    ? articleEl.innerHTML.trim()
-    : "<p>(No content)</p>";
+  const articleEl =
+    doc.querySelector("article");
+
+  const contentHtml =
+    articleEl
+      ? articleEl.innerHTML.trim()
+      : "<p>(No content)</p>";
 
   return {
-    id: "news-1",
+    id: articleId,
     title,
     source,
     topic: config.topicLabel,
@@ -119,12 +135,42 @@ export async function getArticle(topic, pattern) {
   };
 }
 
-export async function generateDebate(topic, pattern) {
-  const config = getSelectedConfig(topic, pattern);
+/*
+ * ==================================================
+ * DEBATE
+ * ==================================================
+ */
+export async function generateDebate(
+  topic,
+  pattern,
+) {
+  const topicConfig =
+    CONVERSATION_CONFIG[topic];
+
+  if (!topicConfig) {
+    throw new Error(
+      `Invalid or missing topic: ${topic}`,
+    );
+  }
+
+  const conversation =
+    topicConfig.conversations[pattern];
+
+  if (!conversation) {
+    throw new Error(
+      `Invalid or missing conversation pattern: ${pattern}`,
+    );
+  }
 
   return {
-    topics: [config.topicLabel],
-    agents: config.conversation.agents,
-    messages: config.conversation.messages,
+    topics: [
+      topicConfig.topicLabel,
+    ],
+
+    agents:
+      conversation.agents,
+
+    messages:
+      conversation.messages,
   };
 }

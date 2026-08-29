@@ -8,18 +8,35 @@ import "./MyTwoCents.css";
 import Navigator from "./components/Navigator/Navigator.jsx";
 import PageNavigation from "../../PageNavigation/PageNavigation.jsx";
 
-export default function MyTwoCents({topic, pattern, onPrevious, onNext}) {
-    console.log("MyTwoCents props:", {
+export default function MyTwoCents({
   topic,
+  article: articleId,
   pattern,
-});
-  const [showChat, setShowChat] = useState(true);
+  onPrevious,
+  onNext,
+}) {
+  console.log("MyTwoCents props:", {
+    topic,
+    articleId,
+    pattern,
+  });
 
-  const [article, setArticle] = useState(null);
-  const [loadingArticle, setLoadingArticle] = useState(true);
+  const [showChat, setShowChat] =
+    useState(true);
 
-  const [debate, setDebate] = useState(null);
-  const [debateError, setDebateError] = useState("");
+  const [article, setArticle] =
+    useState(null);
+
+  const [
+    loadingArticle,
+    setLoadingArticle,
+  ] = useState(true);
+
+  const [debate, setDebate] =
+    useState(null);
+
+  const [debateError, setDebateError] =
+    useState("");
 
   useEffect(() => {
     const loadPageData = async () => {
@@ -27,11 +44,33 @@ export default function MyTwoCents({topic, pattern, onPrevious, onNext}) {
         setLoadingArticle(true);
         setDebateError("");
 
-        const [articleResponse, debateResponse] =
-          await Promise.all([
-            getArticle(topic, pattern),
-            generateDebate(topic, pattern),
-          ]);
+        const [
+          articleResponse,
+          debateResponse,
+        ] = await Promise.all([
+          /*
+           * Article is selected by the exact
+           * article ID assigned by the backend.
+           *
+           * e.g.:
+           * nuclearenergy1
+           * casinoir2
+           */
+          getArticle(articleId),
+
+          /*
+           * Conversation is selected by
+           * topic + pattern.
+           *
+           * e.g.:
+           * casinoir + P03
+           * nuclearenergy + P05
+           */
+          generateDebate(
+            topic,
+            pattern,
+          ),
+        ]);
 
         setArticle(articleResponse);
         setDebate(debateResponse);
@@ -51,22 +90,27 @@ export default function MyTwoCents({topic, pattern, onPrevious, onNext}) {
     };
 
     loadPageData();
-  }, [topic, pattern]);
+  }, [topic, articleId, pattern]);
 
-  const agents = debate?.agents ?? [];
-  const messages = debate?.messages ?? [];
+  const agents =
+    debate?.agents ?? [];
 
-  const supportAgents = agents.filter(
-    (agent) =>
-      agent.stance === "support" ||
-      agent.side === "left",
-  );
+  const messages =
+    debate?.messages ?? [];
 
-  const opposeAgents = agents.filter(
-    (agent) =>
-      agent.stance === "oppose" ||
-      agent.side === "right",
-  );
+  const supportAgents =
+    agents.filter(
+      (agent) =>
+        agent.stance === "support" ||
+        agent.side === "left",
+    );
+
+  const opposeAgents =
+    agents.filter(
+      (agent) =>
+        agent.stance === "oppose" ||
+        agent.side === "right",
+    );
 
   return (
     <>
@@ -78,7 +122,9 @@ export default function MyTwoCents({topic, pattern, onPrevious, onNext}) {
             <button
               type="button"
               onClick={() =>
-                setShowChat((current) => !current)
+                setShowChat(
+                  (current) => !current,
+                )
               }
               title={
                 showChat
@@ -100,25 +146,32 @@ export default function MyTwoCents({topic, pattern, onPrevious, onNext}) {
 
           <div
             className={`debate-container ${
-              showChat ? "split" : "single"
+              showChat
+                ? "split"
+                : "single"
             }`}
           >
             {/* Article panel */}
             <section className="panel">
               <div className="panel-header">
-                <strong>ニュース記事</strong>
+                <strong>
+                  ニュース記事
+                </strong>
               </div>
 
               <div className="panel-body">
                 {loadingArticle && (
-                  <div>Loading article...</div>
-                )}
-
-                {!loadingArticle && !article && (
-                  <div className="empty-state">
-                    Article not found.
+                  <div>
+                    Loading article...
                   </div>
                 )}
+
+                {!loadingArticle &&
+                  !article && (
+                    <div className="empty-state">
+                      Article not found.
+                    </div>
+                  )}
 
                 {article && (
                   <>
@@ -155,7 +208,9 @@ export default function MyTwoCents({topic, pattern, onPrevious, onNext}) {
             {showChat && (
               <section className="panel">
                 <div className="panel-header">
-                  <strong>チャットボット</strong>
+                  <strong>
+                    チャットボット
+                  </strong>
                 </div>
 
                 <div className="panel-body">
@@ -182,7 +237,10 @@ export default function MyTwoCents({topic, pattern, onPrevious, onNext}) {
 
                           <div className="team">
                             {supportAgents.map(
-                              (agent, index) => (
+                              (
+                                agent,
+                                index,
+                              ) => (
                                 <div
                                   key={`support-${agent.name}-${index}`}
                                   className="agent-badge support"
@@ -201,7 +259,10 @@ export default function MyTwoCents({topic, pattern, onPrevious, onNext}) {
 
                           <div className="team right">
                             {opposeAgents.map(
-                              (agent, index) => (
+                              (
+                                agent,
+                                index,
+                              ) => (
                                 <div
                                   key={`oppose-${agent.name}-${index}`}
                                   className="agent-badge oppose"
@@ -226,15 +287,10 @@ export default function MyTwoCents({topic, pattern, onPrevious, onNext}) {
               </section>
             )}
           </div>
-        <PageNavigation
+
+          <PageNavigation
             onPrevious={onPrevious}
             onNext={onNext}
-            // nextDisabled={
-            //   loadingArticle ||
-            //   !article ||
-            //   !debate ||
-            //   Boolean(debateError)
-            // }
             nextLabel="事後アンケートへ進む"
           />
         </div>
