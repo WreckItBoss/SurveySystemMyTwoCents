@@ -103,7 +103,7 @@ export default function ConsentPage({
               </li>
 
               <li>
-                パソコンまたはスマートフォンからタスクに参加できる方
+                パソコンからタスクに参加できる方
               </li>
 
               <li>
