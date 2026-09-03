@@ -109,13 +109,6 @@ export async function createResponse(req, res, next) {
       });
     }
 
-    if (!activeSession.pattern) {
-      return res.status(500).json({
-        message:
-          "The questionnaire session does not have an assigned pattern.",
-      });
-    }
-
     const topic =
       activeSession.topic;
 
@@ -126,7 +119,7 @@ export async function createResponse(req, res, next) {
       activeSession.condition;
 
     const pattern =
-      activeSession.pattern;
+      activeSession.pattern ?? null;
 
     /*
      * ==================================================
@@ -188,10 +181,17 @@ export async function createResponse(req, res, next) {
 
         /*
          * MyTwoCents-specific questions.
+         * News Only participants will have
+         * null values for these fields.
          */
-        chatbotAppropriateness,
-        chatbotTrustworthiness,
-        chatbotEngagement,
+        chatbotAppropriateness:
+          chatbotAppropriateness ?? null,
+
+        chatbotTrustworthiness:
+          chatbotTrustworthiness ?? null,
+
+        chatbotEngagement:
+          chatbotEngagement ?? null,
 
         postStance,
 
@@ -255,11 +255,18 @@ export async function createResponse(req, res, next) {
 
     /*
      * ==================================================
-     * UPDATE ARTICLE + PATTERN QUOTA
+     * UPDATE EXPERIMENTAL CELL QUOTA
      * ==================================================
      *
-     * Each article + pattern combination
-     * is one experimental cell.
+     * Experimental cell:
+     *
+     * article + condition + pattern
+     *
+     * News Only:
+     *   pattern = null
+     *
+     * MyTwoCents:
+     *   pattern = P01-P05
      *
      * Correct:
      *   completedCount +1
@@ -274,8 +281,12 @@ export async function createResponse(req, res, next) {
           article:
             completedSession.article,
 
+          condition:
+            completedSession.condition,
+
           pattern:
-            completedSession.pattern,
+            completedSession.pattern ??
+            null,
         },
         {
           $inc: {
@@ -289,8 +300,12 @@ export async function createResponse(req, res, next) {
           article:
             completedSession.article,
 
+          condition:
+            completedSession.condition,
+
           pattern:
-            completedSession.pattern,
+            completedSession.pattern ??
+            null,
         },
         {
           $inc: {
