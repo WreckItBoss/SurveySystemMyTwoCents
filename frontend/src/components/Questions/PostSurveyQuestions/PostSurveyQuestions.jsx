@@ -74,7 +74,7 @@ export default function createPostSurveyQuestions(topic, condition) {
   const finalQuestions = [
     {
       key: "postStance",
-      label: `ニュース記事を読んだ上で、あなたの意見をお聞かせください。「${topic}」について賛成ですか、反対ですか。`,
+      label: `${contentLabel}を読んだ上で、あなたの意見をお聞かせください。「${topic}」について賛成ですか、反対ですか。`,
       options: stanceOptions,
     },
   ];
