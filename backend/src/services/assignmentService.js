@@ -95,8 +95,12 @@ async function releaseExpiredSessions() {
      */
     await AssignmentQuota.findOneAndUpdate(
       {
-        article: expiredSession.article,
-        condition: expiredSession.condition,
+        article:
+          expiredSession.article,
+
+        condition:
+          expiredSession.condition,
+
         pattern:
           expiredSession.pattern ?? null,
       },
@@ -185,6 +189,208 @@ function getActiveCount(
   return activeCounts.get(key) ?? 0;
 }
 
+/*
+ * Get the current participant count
+ * for a specific experimental cell.
+ *
+ * We count:
+ *
+ *   completed + currently active
+ *
+ * Incorrect and expired participants
+ * do not count toward the target.
+ */
+function getCurrentCount(
+  quota,
+  activeCounts,
+) {
+  return (
+    quota.completedCount +
+    getActiveCount(
+      quota,
+      activeCounts,
+    )
+  );
+}
+
+/*
+ * ==================================================
+ * STEP 1: SELECT CONDITION
+ * ==================================================
+ *
+ * First balance:
+ *
+ *   News Only
+ *        vs
+ *   MyTwoCents
+ *
+ * Expected final totals:
+ *
+ *   News Only   = 100
+ *   MyTwoCents  = 100
+ */
+function selectCondition(
+  quotas,
+  activeCounts,
+) {
+  const conditions = [
+    "news",
+    "mytwocents",
+  ];
+
+  return selectLowestScore(
+    conditions,
+    (condition) => {
+      const conditionQuotas =
+        quotas.filter(
+          (quota) =>
+            quota.condition ===
+            condition,
+        );
+
+      return conditionQuotas.reduce(
+        (total, quota) =>
+          total +
+          getCurrentCount(
+            quota,
+            activeCounts,
+          ),
+        0,
+      );
+    },
+  );
+}
+
+/*
+ * ==================================================
+ * STEP 2: SELECT ARTICLE / TOPIC
+ * ==================================================
+ *
+ * After selecting the condition,
+ * balance the four articles within
+ * that condition.
+ *
+ * Example:
+ *
+ * MyTwoCents:
+ *
+ *   aiCopyright   = 10
+ *   aiinschool    = 11
+ *   immigration   = 12
+ *   underagesns   = 11
+ *
+ * -> aiCopyright is selected.
+ */
+function selectArticle(
+  quotas,
+  activeCounts,
+  condition,
+) {
+  const conditionQuotas =
+    quotas.filter(
+      (quota) =>
+        quota.condition === condition,
+    );
+
+  const articles = [
+    ...new Set(
+      conditionQuotas.map(
+        (quota) => quota.article,
+      ),
+    ),
+  ];
+
+  return selectLowestScore(
+    articles,
+    (article) => {
+      const articleQuotas =
+        conditionQuotas.filter(
+          (quota) =>
+            quota.article === article,
+        );
+
+      return articleQuotas.reduce(
+        (total, quota) =>
+          total +
+          getCurrentCount(
+            quota,
+            activeCounts,
+          ),
+        0,
+      );
+    },
+  );
+}
+
+/*
+ * ==================================================
+ * STEP 3: SELECT EXACT CELL
+ * ==================================================
+ *
+ * News Only:
+ *   article + news + null
+ *
+ * MyTwoCents:
+ *   article + mytwocents + P01-P05
+ */
+function selectExperimentalCell(
+  quotas,
+  activeCounts,
+  condition,
+  article,
+) {
+  /*
+   * News Only has no conversation pattern.
+   */
+  if (condition === "news") {
+    const newsQuota =
+      quotas.find(
+        (quota) =>
+          quota.condition === "news" &&
+          quota.article === article &&
+          quota.pattern == null,
+      );
+
+    if (!newsQuota) {
+      throw new Error(
+        `NEWS_QUOTA_NOT_FOUND:${article}`,
+      );
+    }
+
+    return newsQuota;
+  }
+
+  /*
+   * MyTwoCents:
+   *
+   * Within the selected article,
+   * select the pattern with the fewest
+   * completed + active participants.
+   */
+  const patternQuotas =
+    quotas.filter(
+      (quota) =>
+        quota.condition ===
+          "mytwocents" &&
+        quota.article === article,
+    );
+
+  if (patternQuotas.length === 0) {
+    throw new Error(
+      `MYTWOCENTS_QUOTA_NOT_FOUND:${article}`,
+    );
+  }
+
+  return selectLowestScore(
+    patternQuotas,
+    (quota) =>
+      getCurrentCount(
+        quota,
+        activeCounts,
+      ),
+  );
+}
+
 export async function reserveAssignment() {
   /*
    * First update sessions whose time limit
@@ -196,12 +402,15 @@ export async function reserveAssignment() {
    * Load all assignment quotas.
    *
    * News Only:
-   * 4 articles × 1 cell = 4 cells
+   *   4 articles × 1 cell
+   *   = 4 cells
    *
    * MyTwoCents:
-   * 4 articles × 5 patterns = 20 cells
+   *   4 articles × 5 patterns
+   *   = 20 cells
    *
-   * 24 experimental cells total.
+   * Total:
+   *   24 experimental cells
    */
   const quotas =
     await AssignmentQuota.find({}).lean();
@@ -220,38 +429,63 @@ export async function reserveAssignment() {
     await getActiveCounts();
 
   /*
-   * Balancing score:
+   * ==================================================
+   * HIERARCHICAL ASSIGNMENT
+   * ==================================================
    *
-   *   completed + active
-   *   ------------------
-   *         target
+   * STEP 1
+   * Balance experimental condition:
    *
-   * News Only target = 25
-   * MyTwoCents pattern target = 5
+   *   News Only
+   *        vs
+   *   MyTwoCents
+   */
+  const selectedCondition =
+    selectCondition(
+      quotas,
+      activeCounts,
+    );
+
+  /*
+   * STEP 2
+   * Within the selected condition,
+   * balance the four articles/topics.
+   */
+  const selectedArticle =
+    selectArticle(
+      quotas,
+      activeCounts,
+      selectedCondition,
+    );
+
+  /*
+   * STEP 3
    *
-   * This keeps:
+   * News Only:
+   *   pattern = null
    *
-   * News Only = 25 per article
-   * MyTwoCents = 5 per pattern
+   * MyTwoCents:
+   *   balance P01-P05 within
+   *   the selected article.
    */
   const selectedQuota =
-    selectLowestScore(
+    selectExperimentalCell(
       quotas,
-      (quota) =>
-        (
-          quota.completedCount +
-          getActiveCount(
-            quota,
-            activeCounts,
-          )
-        ) /
-        quota.target,
+      activeCounts,
+      selectedCondition,
+      selectedArticle,
     );
 
   return {
-    topic: selectedQuota.topic,
-    article: selectedQuota.article,
-    condition: selectedQuota.condition,
+    topic:
+      selectedQuota.topic,
+
+    article:
+      selectedQuota.article,
+
+    condition:
+      selectedQuota.condition,
+
     pattern:
       selectedQuota.pattern ?? null,
   };
