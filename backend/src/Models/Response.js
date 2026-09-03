@@ -9,14 +9,16 @@ const responseSchema = new mongoose.Schema(
       index: true,
     },
 
-    topic: {
-      type: String,
-      required: true,
-      enum: [
-        "nuclearenergy",
-        "casinoir",
-      ],
-    },
+  topic: {
+    type: String,
+    required: true,
+    enum: [
+      "aiCopyright",
+      "aiinschool",
+      "immigration",
+      "underagesns",
+    ],
+  },
 
     /*
      * Exact news article shown to the participant.
@@ -25,15 +27,20 @@ const responseSchema = new mongoose.Schema(
       type: String,
       required: true,
       enum: [
-        "nuclearenergy1",
-        "casinoir2",
+        "aiCopyright",
+        "aiinschool",
+        "immigration",
+        "underagesns",
       ],
     },
 
     condition: {
       type: String,
       required: true,
-      enum: ["mytwocents"],
+      enum: [
+        "mytwocents",
+        "news",
+      ],
     },
 
     pattern: {

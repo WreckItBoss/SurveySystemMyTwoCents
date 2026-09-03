@@ -27,7 +27,7 @@ const assignmentQuotaSchema = new mongoose.Schema(
     condition: {
       type: String,
       required: true,
-      enum: ["mytwocents"],
+      enum: ["news", "mytwocents"],
       default: "mytwocents",
     },
 
