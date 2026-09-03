@@ -14,24 +14,49 @@ const patterns = [
 
 const articles = [
   {
-    topic: "nuclearenergy",
-    article: "nuclearenergy1",
+    topic: "aiCopyright",
+    article: "aiCopyright",
   },
   {
-    topic: "casinoir",
-    article: "casinoir2",
+    topic: "aiinschool",
+    article: "aiinschool",
+  },
+  {
+    topic: "immigration",
+    article: "immigration",
+  },
+  {
+    topic: "underagesns",
+    article: "underagesns",
   },
 ];
 
 /*
  * Create:
  *
- * nuclearenergy1 × P01-P05
- * casinoir2      × P01-P05
+ * News Only:
+ * 4 articles × 1 condition
  *
- * 10 experimental cells total.
+ * MyTwoCents:
+ * 4 articles × P01-P05
+ *
+ * 24 experimental cells total.
  */
-const quotas = articles.flatMap(
+
+const newsQuotas = articles.map(
+  ({ topic, article }) => ({
+    topic,
+    article,
+    condition: "news",
+    pattern: null,
+    target: 5,
+    completedCount: 0,
+    incorrectCount: 0,
+    expiredCount: 0,
+  }),
+);
+
+const myTwoCentsQuotas = articles.flatMap(
   ({ topic, article }) =>
     patterns.map((pattern) => ({
       topic,
@@ -45,34 +70,32 @@ const quotas = articles.flatMap(
     })),
 );
 
+const quotas = [
+  ...newsQuotas,
+  ...myTwoCentsQuotas,
+];
+
 async function seedAssignmentQuotas() {
   try {
     await connectDatabase();
 
     /*
-     * Remove quota documents from the
-     * previous News Only experiment.
+     * Remove old quota documents.
      */
     await AssignmentQuota.deleteMany({});
 
     /*
      * Synchronize MongoDB indexes with the
-     * CURRENT AssignmentQuota schema.
+     * current AssignmentQuota schema.
      *
-     * The previous News Only experiment used:
+     * Current unique experimental-cell index:
      *
-     *   article_1
-     *
-     * The current experiment uses:
-     *
-     *   article_1_pattern_1
-     *
-     * as the unique experimental-cell index.
+     * article + condition + pattern
      */
     await AssignmentQuota.syncIndexes();
 
     /*
-     * Insert the 10 article + pattern quotas.
+     * Insert all 24 experimental cells.
      */
     await AssignmentQuota.insertMany(
       quotas,
@@ -94,6 +117,7 @@ async function seedAssignmentQuotas() {
       quotas.map((quota) => ({
         topic: quota.topic,
         article: quota.article,
+        condition: quota.condition,
         pattern: quota.pattern,
         target: quota.target,
       })),
