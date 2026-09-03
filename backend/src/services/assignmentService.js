@@ -32,12 +32,16 @@ function selectLowestScore(
 /*
  * Create a unique key for one experimental cell.
  *
- * Example:
- *   casinoir2 + P01
- *   nuclearenergy1 + P03
+ * Examples:
+ *   aiCopyright + news + null
+ *   aiCopyright + mytwocents + P01
  */
-function getCellKey(article, pattern) {
-  return `${article}:${pattern}`;
+function getCellKey(
+  article,
+  condition,
+  pattern,
+) {
+  return `${article}:${condition}:${pattern ?? "none"}`;
 }
 
 /*
@@ -87,12 +91,14 @@ async function releaseExpiredSessions() {
 
     /*
      * Record the expired participant for the
-     * exact article + pattern cell.
+     * exact experimental cell.
      */
     await AssignmentQuota.findOneAndUpdate(
       {
         article: expiredSession.article,
-        pattern: expiredSession.pattern,
+        condition: expiredSession.condition,
+        pattern:
+          expiredSession.pattern ?? null,
       },
       {
         $inc: {
@@ -105,7 +111,7 @@ async function releaseExpiredSessions() {
 
 /*
  * Count currently active, non-expired sessions
- * for each article + pattern cell.
+ * for each experimental cell.
  *
  * Active participants are used only as a
  * temporary balancing signal.
@@ -121,13 +127,13 @@ async function getActiveCounts() {
           expiresAt: {
             $gt: now,
           },
-          condition: "mytwocents",
         },
       },
       {
         $group: {
           _id: {
             article: "$article",
+            condition: "$condition",
             pattern: "$pattern",
           },
           count: {
@@ -140,19 +146,16 @@ async function getActiveCounts() {
   const activeCounts = new Map();
 
   for (const item of activeSessions) {
-    /*
-     * Ignore old/incomplete sessions that
-     * do not have article or pattern.
-     */
     if (
       !item._id?.article ||
-      !item._id?.pattern
+      !item._id?.condition
     ) {
       continue;
     }
 
     const key = getCellKey(
       item._id.article,
+      item._id.condition,
       item._id.pattern,
     );
 
@@ -167,7 +170,7 @@ async function getActiveCounts() {
 
 /*
  * Get the active participant count
- * for a specific article + pattern cell.
+ * for a specific experimental cell.
  */
 function getActiveCount(
   quota,
@@ -175,6 +178,7 @@ function getActiveCount(
 ) {
   const key = getCellKey(
     quota.article,
+    quota.condition,
     quota.pattern,
   );
 
@@ -189,16 +193,15 @@ export async function reserveAssignment() {
   await releaseExpiredSessions();
 
   /*
-   * Load all 10 article + pattern quotas.
+   * Load all assignment quotas.
    *
-   * 2 articles × 5 patterns = 10 cells.
+   * News Only:
+   * 4 articles × 1 cell = 4 cells
    *
-   * IMPORTANT:
-   * We deliberately do NOT filter using
-   * completedCount < target.
+   * MyTwoCents:
+   * 4 articles × 5 patterns = 20 cells
    *
-   * The target is used for balancing rather
-   * than as a hard reservation wall.
+   * 24 experimental cells total.
    */
   const quotas =
     await AssignmentQuota.find({}).lean();
@@ -211,45 +214,25 @@ export async function reserveAssignment() {
 
   /*
    * Count participants who are currently
-   * answering each article + pattern cell.
+   * answering each experimental cell.
    */
   const activeCounts =
     await getActiveCounts();
 
   /*
-   * ==================================================
-   * CHOOSE ARTICLE + PATTERN
-   * ==================================================
-   *
-   * Each article + pattern combination is
-   * one experimental cell.
-   *
    * Balancing score:
    *
    *   completed + active
    *   ------------------
    *         target
    *
-   * Example:
+   * News Only target = 25
+   * MyTwoCents pattern target = 5
    *
-   * casinoir2 / P01:
-   *   completed = 3
-   *   active    = 1
-   *   target    = 5
+   * This keeps:
    *
-   *   score = 4 / 5 = 0.8
-   *
-   * casinoir2 / P02:
-   *   completed = 2
-   *   active    = 0
-   *   target    = 5
-   *
-   *   score = 2 / 5 = 0.4
-   *
-   * P02 therefore has higher priority.
-   *
-   * If multiple cells have the same lowest
-   * score, randomly choose between them.
+   * News Only = 25 per article
+   * MyTwoCents = 5 per pattern
    */
   const selectedQuota =
     selectLowestScore(
@@ -265,14 +248,11 @@ export async function reserveAssignment() {
         quota.target,
     );
 
-  /*
-   * Every participant in this experiment
-   * receives the MyTwoCents condition.
-   */
   return {
     topic: selectedQuota.topic,
     article: selectedQuota.article,
-    condition: "mytwocents",
-    pattern: selectedQuota.pattern,
+    condition: selectedQuota.condition,
+    pattern:
+      selectedQuota.pattern ?? null,
   };
 }
