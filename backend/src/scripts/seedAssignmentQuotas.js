@@ -35,10 +35,19 @@ const articles = [
  * Create:
  *
  * News Only:
- * 4 articles × 1 condition
+ * 4 articles × 1 condition × 25 participants
  *
  * MyTwoCents:
- * 4 articles × P01-P05
+ * 4 articles × P01-P05 × 5 participants
+ *
+ * Per article:
+ * News Only = 25
+ * MyTwoCents = 25
+ *
+ * Total:
+ * News Only = 100
+ * MyTwoCents = 100
+ * N = 200
  *
  * 24 experimental cells total.
  */
@@ -49,7 +58,7 @@ const newsQuotas = articles.map(
     article,
     condition: "news",
     pattern: null,
-    target: 5,
+    target: 25,
     completedCount: 0,
     incorrectCount: 0,
     expiredCount: 0,
