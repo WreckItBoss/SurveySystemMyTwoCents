@@ -1,37 +1,19 @@
-import nuclearEnergy1Html from "./nuclearenergy1.html?raw";
-import nuclearEnergy2Html from "./nuclearenergy2.html?raw";
+import aiCopyright from "./aiCopyright.html?raw";
+import aiinschool from "./aiinschool.html?raw";
 
-import immigration1Html from "./immigration1.html?raw";
-import immigration2Html from "./immigration2.html?raw";
+import immigration from "./immigration.html?raw";
 
-import usingBallAtPark1Html from "./usingballatpark1.html?raw";
-import usingBallAtPark2Html from "./usingballatpark2.html?raw";
-
-import casinoIr1Html from "./casinoir1.html?raw";
-import casinoIr2Html from "./casinoir2.html?raw";
-
-import decreaseRicePrice1Html from "./decreasericeprice1.html?raw";
-import decreaseRicePrice2Html from "./decreasericeprice2.html?raw";
-
-import PageNavigation from "../../PageNavigation/PageNavigation";
+import underagesns from "./underagesns.html?raw";
 
 // import "./NewsOnly.css";
 
 const articles = {
-  nuclearenergy1: nuclearEnergy1Html,
-  nuclearenergy2: nuclearEnergy2Html,
+  aiCopyright: aiCopyright,
+  aiinschool: aiinschool,
 
-  immigration1: immigration1Html,
-  immigration2: immigration2Html,
+  immigration: immigration,
 
-  usingballatpark1: usingBallAtPark1Html,
-  usingballatpark2: usingBallAtPark2Html,
-
-  casinoir1: casinoIr1Html,
-  casinoir2: casinoIr2Html,
-
-  decreasericeprice1: decreaseRicePrice1Html,
-  decreasericeprice2: decreaseRicePrice2Html,
+  underagesns: underagesns,
 };
 
 export default function NewsOnly({
