@@ -4,8 +4,10 @@ import AssignmentQuota from "../Models/AssignmentQuota.js";
 import { reserveAssignment } from "../services/assignmentService.js";
 
 const topicLabels = {
-  nuclearenergy: "原子力発電",
-  casinoir: "カジノ・IR",
+  aiCopyright: "生成AIに対する著作権規制の強化",
+  aiinschool: "学校教育での生成AI利用",
+  immigration: "移民受け入れ",
+  underagesns: "未成年SNS利用規制",
 };
 
 export async function startSession(
@@ -30,9 +32,17 @@ export async function startSession(
      * Store the exact experimental cell
      * assigned to this participant.
      *
-     * Example:
-     *   topic: nuclearenergy
-     *   article: nuclearenergy1
+     * Examples:
+     *
+     * News Only:
+     *   topic: aiCopyright
+     *   article: aiCopyright
+     *   condition: news
+     *   pattern: null
+     *
+     * MyTwoCents:
+     *   topic: aiCopyright
+     *   article: aiCopyright
      *   condition: mytwocents
      *   pattern: P03
      */
@@ -112,12 +122,14 @@ export async function expireSession(
 
     /*
      * Increment the expired count for the
-     * exact article + pattern cell.
+     * exact experimental cell.
      */
     await AssignmentQuota.findOneAndUpdate(
       {
         article: expiredSession.article,
-        pattern: expiredSession.pattern,
+        condition: expiredSession.condition,
+        pattern:
+          expiredSession.pattern ?? null,
       },
       {
         $inc: {
