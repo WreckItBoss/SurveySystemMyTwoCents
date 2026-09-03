@@ -9,20 +9,17 @@ const responseSchema = new mongoose.Schema(
       index: true,
     },
 
-  topic: {
-    type: String,
-    required: true,
-    enum: [
-      "aiCopyright",
-      "aiinschool",
-      "immigration",
-      "underagesns",
-    ],
-  },
+    topic: {
+      type: String,
+      required: true,
+      enum: [
+        "aiCopyright",
+        "aiinschool",
+        "immigration",
+        "underagesns",
+      ],
+    },
 
-    /*
-     * Exact news article shown to the participant.
-     */
     article: {
       type: String,
       required: true,
@@ -38,21 +35,14 @@ const responseSchema = new mongoose.Schema(
       type: String,
       required: true,
       enum: [
-        "mytwocents",
         "news",
+        "mytwocents",
       ],
     },
 
     pattern: {
       type: String,
-      required: true,
-      enum: [
-        "P01",
-        "P02",
-        "P03",
-        "P04",
-        "P05",
-      ],
+      default: null,
     },
 
     ageGroup: {
@@ -115,21 +105,21 @@ const responseSchema = new mongoose.Schema(
 
     chatbotAppropriateness: {
       type: Number,
-      required: true,
+      default: null,
       min: 1,
       max: 5,
     },
 
     chatbotTrustworthiness: {
       type: Number,
-      required: true,
+      default: null,
       min: 1,
       max: 5,
     },
 
     chatbotEngagement: {
       type: Number,
-      required: true,
+      default: null,
       min: 1,
       max: 5,
     },
@@ -145,14 +135,12 @@ const responseSchema = new mongoose.Schema(
       type: String,
       default: "",
       trim: true,
-      maxlength: 1000,
     },
 
     freeComment: {
       type: String,
       default: "",
       trim: true,
-      maxlength: 1000,
     },
 
     keywordAnswer: {

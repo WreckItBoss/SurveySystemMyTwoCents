@@ -22,8 +22,10 @@ const sessionSchema = new mongoose.Schema(
     condition: {
       type: String,
       required: true,
-      enum: ["news", "mytwocents"],
-      default: "mytwocents",
+      enum: [
+        "news",
+        "mytwocents",
+      ],
     },
 
     article: {
@@ -39,14 +41,7 @@ const sessionSchema = new mongoose.Schema(
 
     pattern: {
       type: String,
-      required: true,
-      enum: [
-        "P01",
-        "P02",
-        "P03",
-        "P04",
-        "P05",
-      ],
+      default: null,
     },
 
     status: {

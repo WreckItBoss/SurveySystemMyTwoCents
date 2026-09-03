@@ -27,20 +27,15 @@ const assignmentQuotaSchema = new mongoose.Schema(
     condition: {
       type: String,
       required: true,
-      enum: ["news", "mytwocents"],
-      default: "mytwocents",
+      enum: [
+        "news",
+        "mytwocents",
+      ],
     },
 
     pattern: {
       type: String,
-      required: true,
-      enum: [
-        "P01",
-        "P02",
-        "P03",
-        "P04",
-        "P05",
-      ],
+      default: null,
     },
 
     target: {
@@ -73,6 +68,7 @@ const assignmentQuotaSchema = new mongoose.Schema(
 assignmentQuotaSchema.index(
   {
     article: 1,
+    condition: 1,
     pattern: 1,
   },
   { unique: true },
