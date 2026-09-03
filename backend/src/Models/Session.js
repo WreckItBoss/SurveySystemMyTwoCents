@@ -12,8 +12,10 @@ const sessionSchema = new mongoose.Schema(
       type: String,
       required: true,
       enum: [
-        "nuclearenergy",
-        "casinoir",
+        "aiCopyright",
+        "aiinschool",
+        "immigration",
+        "underagesns",
       ],
     },
 
@@ -28,8 +30,10 @@ const sessionSchema = new mongoose.Schema(
       type: String,
       required: true,
       enum: [
-        "nuclearenergy1",
-        "casinoir2",
+        "aiCopyright",
+        "aiinschool",
+        "immigration",
+        "underagesns",
       ],
     },
 
