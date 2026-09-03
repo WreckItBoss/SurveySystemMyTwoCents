@@ -1,17 +1,19 @@
-import nuclearArticle from "../newsarticle/NuclearEnergy.html?raw";
-import casinoArticle from "../newsarticle/CasinoIR.html?raw";
+import aiCopyright from "../newsarticle/aiCopyright.html?raw";
+import aininschool from "../newsarticle/aiinschool.html?raw";
+import immigration from "../newsarticle/immigration.html?raw";
+import underagesns from "../newsarticle/underagesns.html?raw";
 
-import nuclearPattern1 from "../conversation/NuclearEnergy/pattern1.js";
-import nuclearPattern2 from "../conversation/NuclearEnergy/pattern2.js";
-import nuclearPattern3 from "../conversation/NuclearEnergy/pattern3.js";
-import nuclearPattern4 from "../conversation/NuclearEnergy/pattern4.js";
-import nuclearPattern5 from "../conversation/NuclearEnergy/pattern5.js";
+import nuclearPattern1 from "../conversation/aiinschool/pattern1.js";
+import nuclearPattern2 from "../conversation/aiinschool/pattern2.js";
+import nuclearPattern3 from "../conversation/aiinschool/pattern3.js";
+import nuclearPattern4 from "../conversation/aiinschool/pattern4.js";
+import nuclearPattern5 from "../conversation/aiinschool/pattern5.js";
 
-import casinoPattern1 from "../conversation/CasinoIR/pattern1.js";
-import casinoPattern2 from "../conversation/CasinoIR/pattern2.js";
-import casinoPattern3 from "../conversation/CasinoIR/pattern3.js";
-import casinoPattern4 from "../conversation/CasinoIR/pattern4.js";
-import casinoPattern5 from "../conversation/CasinoIR/pattern5.js";
+import casinoPattern1 from "../conversation/aiCopyright/pattern1.js";
+import casinoPattern2 from "../conversation/aiCopyright/pattern2.js";
+import casinoPattern3 from "../conversation/aiCopyright/pattern3.js";
+import casinoPattern4 from "../conversation/aiCopyright/pattern4.js";
+import casinoPattern5 from "../conversation/aiCopyright/pattern5.js";
 
 /*
  * ==================================================
