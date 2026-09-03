@@ -1,19 +1,31 @@
 import aiCopyright from "../newsarticle/aiCopyright.html?raw";
-import aininschool from "../newsarticle/aiinschool.html?raw";
+import aiinschool from "../newsarticle/aiinschool.html?raw";
 import immigration from "../newsarticle/immigration.html?raw";
 import underagesns from "../newsarticle/underagesns.html?raw";
 
-import nuclearPattern1 from "../conversation/aiinschool/pattern1.js";
-import nuclearPattern2 from "../conversation/aiinschool/pattern2.js";
-import nuclearPattern3 from "../conversation/aiinschool/pattern3.js";
-import nuclearPattern4 from "../conversation/aiinschool/pattern4.js";
-import nuclearPattern5 from "../conversation/aiinschool/pattern5.js";
+import aiCopyrightPattern1 from "../conversation/aiCopyright/pattern1.js";
+import aiCopyrightPattern2 from "../conversation/aiCopyright/pattern2.js";
+import aiCopyrightPattern3 from "../conversation/aiCopyright/pattern3.js";
+import aiCopyrightPattern4 from "../conversation/aiCopyright/pattern4.js";
+import aiCopyrightPattern5 from "../conversation/aiCopyright/pattern5.js";
 
-import casinoPattern1 from "../conversation/aiCopyright/pattern1.js";
-import casinoPattern2 from "../conversation/aiCopyright/pattern2.js";
-import casinoPattern3 from "../conversation/aiCopyright/pattern3.js";
-import casinoPattern4 from "../conversation/aiCopyright/pattern4.js";
-import casinoPattern5 from "../conversation/aiCopyright/pattern5.js";
+import aiinschoolPattern1 from "../conversation/aiinschool/pattern1.js";
+import aiinschoolPattern2 from "../conversation/aiinschool/pattern2.js";
+import aiinschoolPattern3 from "../conversation/aiinschool/pattern3.js";
+import aiinschoolPattern4 from "../conversation/aiinschool/pattern4.js";
+import aiinschoolPattern5 from "../conversation/aiinschool/pattern5.js";
+
+import immigrationPattern1 from "../conversation/immigration/pattern1.js";
+import immigrationPattern2 from "../conversation/immigration/pattern2.js";
+import immigrationPattern3 from "../conversation/immigration/pattern3.js";
+import immigrationPattern4 from "../conversation/immigration/pattern4.js";
+import immigrationPattern5 from "../conversation/immigration/pattern5.js";
+
+import underagesnsPattern1 from "../conversation/underagesns/pattern1.js";
+import underagesnsPattern2 from "../conversation/underagesns/pattern2.js";
+import underagesnsPattern3 from "../conversation/underagesns/pattern3.js";
+import underagesnsPattern4 from "../conversation/underagesns/pattern4.js";
+import underagesnsPattern5 from "../conversation/underagesns/pattern5.js";
 
 /*
  * ==================================================
@@ -21,19 +33,26 @@ import casinoPattern5 from "../conversation/aiCopyright/pattern5.js";
  * ==================================================
  *
  * The backend assigns the exact article ID.
- *
- * Only these two articles are used in the
- * current experiment.
  */
 const ARTICLE_CONFIG = {
-  nuclearenergy1: {
-    articleHtml: nuclearArticle,
-    topicLabel: "原子力発電",
+  aiCopyright: {
+    articleHtml: aiCopyright,
+    topicLabel: "生成AIに対する著作権規制の強化",
   },
 
-  casinoir2: {
-    articleHtml: casinoArticle,
-    topicLabel: "カジノ・IR",
+  aiinschool: {
+    articleHtml: aiinschool,
+    topicLabel: "学校教育での生成AI利用",
+  },
+
+  immigration: {
+    articleHtml: immigration,
+    topicLabel: "移民受け入れ",
+  },
+
+  underagesns: {
+    articleHtml: underagesns,
+    topicLabel: "未成年SNS利用規制",
   },
 };
 
@@ -47,30 +66,54 @@ const ARTICLE_CONFIG = {
  *   topic + pattern
  *
  * Example:
- *   casinoir + P03
+ *   aiCopyright + P03
  */
 const CONVERSATION_CONFIG = {
-  nuclearenergy: {
-    topicLabel: "原子力発電",
+  aiCopyright: {
+    topicLabel: "生成AIに対する著作権規制の強化",
 
     conversations: {
-      P01: nuclearPattern1,
-      P02: nuclearPattern2,
-      P03: nuclearPattern3,
-      P04: nuclearPattern4,
-      P05: nuclearPattern5,
+      P01: aiCopyrightPattern1,
+      P02: aiCopyrightPattern2,
+      P03: aiCopyrightPattern3,
+      P04: aiCopyrightPattern4,
+      P05: aiCopyrightPattern5,
     },
   },
 
-  casinoir: {
-    topicLabel: "カジノ・IR",
+  aiinschool: {
+    topicLabel: "学校教育での生成AI利用",
 
     conversations: {
-      P01: casinoPattern1,
-      P02: casinoPattern2,
-      P03: casinoPattern3,
-      P04: casinoPattern4,
-      P05: casinoPattern5,
+      P01: aiinschoolPattern1,
+      P02: aiinschoolPattern2,
+      P03: aiinschoolPattern3,
+      P04: aiinschoolPattern4,
+      P05: aiinschoolPattern5,
+    },
+  },
+
+  immigration: {
+    topicLabel: "移民受け入れ",
+
+    conversations: {
+      P01: immigrationPattern1,
+      P02: immigrationPattern2,
+      P03: immigrationPattern3,
+      P04: immigrationPattern4,
+      P05: immigrationPattern5,
+    },
+  },
+
+  underagesns: {
+    topicLabel: "未成年SNS利用規制",
+
+    conversations: {
+      P01: underagesnsPattern1,
+      P02: underagesnsPattern2,
+      P03: underagesnsPattern3,
+      P04: underagesnsPattern4,
+      P05: underagesnsPattern5,
     },
   },
 };
@@ -117,7 +160,7 @@ export async function getArticle(articleId) {
     parts[0] || "";
 
   const date =
-    parts[2] || null;
+    parts[1] || null;
 
   const articleEl =
     doc.querySelector("article");
