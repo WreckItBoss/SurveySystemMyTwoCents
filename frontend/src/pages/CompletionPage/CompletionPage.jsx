@@ -41,7 +41,7 @@ export default function CompletionPage({
 
             <div className="completion-page__question">
               <QuestionScale
-                label="ニュース記事及びチャットボットを読んでください。ページのどこかにキーワードが書かれています。それが何か答えてください。"
+                label="ページのどこかにキーワードが書かれています。それが何か答えてください。"
                 options={keywordOptions}
                 value={selectedKeyword}
                 onChange={onKeywordChange}
