@@ -13,9 +13,9 @@ const responseSchema = new mongoose.Schema(
       type: String,
       required: true,
       enum: [
-        "aiCopyright",
         "aiinschool",
-        "immigration",
+        "nuclearenergy",
+        "selfdrivingcars",
         "underagesns",
       ],
     },
@@ -24,9 +24,9 @@ const responseSchema = new mongoose.Schema(
       type: String,
       required: true,
       enum: [
-        "aiCopyright",
         "aiinschool",
-        "immigration",
+        "nuclearenergy",
+        "selfdrivingcars",
         "underagesns",
       ],
     },
