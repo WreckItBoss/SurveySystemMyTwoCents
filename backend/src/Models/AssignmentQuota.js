@@ -6,9 +6,9 @@ const assignmentQuotaSchema = new mongoose.Schema(
       type: String,
       required: true,
       enum: [
-        "aiCopyright",
         "aiinschool",
-        "immigration",
+        "nuclearenergy",
+        "selfdrivingcars",
         "underagesns",
       ],
     },
@@ -17,9 +17,9 @@ const assignmentQuotaSchema = new mongoose.Schema(
       type: String,
       required: true,
       enum: [
-        "aiCopyright",
         "aiinschool",
-        "immigration",
+        "nuclearenergy",
+        "selfdrivingcars",
         "underagesns",
       ],
     },
