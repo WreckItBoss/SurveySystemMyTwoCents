@@ -39,7 +39,7 @@ export default function createPostSurveyQuestions(topic, condition) {
       label: `${contentLabel}を読むことで、新しい情報を知ることができましたか。`,
       options: agreementOptions,
     },
-      {
+    {
       key: "perspectiveComparison",
       label: `${contentLabel}を読むことで、様々な意見を比較することができましたか。`,
       options: agreementOptions,
@@ -49,7 +49,6 @@ export default function createPostSurveyQuestions(topic, condition) {
       label: `${contentLabel}を読むことで、関連する話題や他の記事をさらに調べてみたいという気持ちになりましたか。`,
       options: agreementOptions,
     },
-
   ];
 
   const myTwoCentsQuestions = [
@@ -68,7 +67,7 @@ export default function createPostSurveyQuestions(topic, condition) {
       label:
         "チャットボットの会話は、最後まで興味を持って読むことができましたか。",
       options: agreementOptions,
-    }
+    },
   ];
 
   const finalQuestions = [
@@ -85,10 +84,11 @@ export default function createPostSurveyQuestions(topic, condition) {
     ...finalQuestions,
   ];
 }
+
 export const furtherExplorationReasonQuestion = {
   key: "furtherExplorationReason",
   label:
-   "この話題について「さらに調べたい」と思った理由、またはそう思わなかった理由をご記入ください。",
+    "この話題について「さらに調べたい」と思った理由、またはそう思わなかった理由をご記入ください。",
   placeholder: "こちらにご記入ください。",
 };
 
