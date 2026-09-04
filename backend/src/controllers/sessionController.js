@@ -4,9 +4,9 @@ import AssignmentQuota from "../Models/AssignmentQuota.js";
 import { reserveAssignment } from "../services/assignmentService.js";
 
 const topicLabels = {
-  aiCopyright: "生成AIに対する著作権規制の強化",
   aiinschool: "学校教育での生成AI利用",
-  immigration: "移民受け入れ",
+  nuclearenergy: "原子力発電",
+  selfdrivingcars: "自動運転",
   underagesns: "未成年SNS利用規制",
 };
 
@@ -35,14 +35,14 @@ export async function startSession(
      * Examples:
      *
      * News Only:
-     *   topic: aiCopyright
-     *   article: aiCopyright
+     *   topic: nuclearenergy
+     *   article: nuclearenergy
      *   condition: news
      *   pattern: null
      *
      * MyTwoCents:
-     *   topic: aiCopyright
-     *   article: aiCopyright
+     *   topic: nuclearenergy
+     *   article: nuclearenergy
      *   condition: mytwocents
      *   pattern: P03
      */
