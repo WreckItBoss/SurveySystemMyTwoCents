@@ -14,16 +14,16 @@ const patterns = [
 
 const articles = [
   {
-    topic: "aiCopyright",
-    article: "aiCopyright",
-  },
-  {
     topic: "aiinschool",
     article: "aiinschool",
   },
   {
-    topic: "immigration",
-    article: "immigration",
+    topic: "nuclearenergy",
+    article: "nuclearenergy",
+  },
+  {
+    topic: "selfdrivingcars",
+    article: "selfdrivingcars",
   },
   {
     topic: "underagesns",
