@@ -1,6 +1,6 @@
 import aiinschool from "./aiinschool.html?raw";
 import nuclearenergy from "./nuclearenergy.html?raw";
-import selfdrivingcars from "./selfdrivingcars.html?raw";
+import selfdrivingcars from "./SelfDrivingCars.html?raw";
 import underagesns from "./underagesns.html?raw";
 
 import PageNavigation from "../../PageNavigation/PageNavigation";

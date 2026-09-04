@@ -1,5 +1,5 @@
 import aiinschool from "../newsarticle/aiinschool.html?raw";
-import nuclearenergy from "../newsarticle/nuclearenergy.html?raw";
+import nuclearenergy from "../newsarticle/NuclearEnergy.html?raw";
 import selfdrivingcars from "../newsarticle/SelfDrivingCars.html?raw";
 import underagesns from "../newsarticle/underagesns.html?raw";
 
@@ -15,11 +15,11 @@ import nuclearenergyPattern3 from "../conversation/NuclearEnergy/pattern3.js";
 import nuclearenergyPattern4 from "../conversation/NuclearEnergy/pattern4.js";
 import nuclearenergyPattern5 from "../conversation/NuclearEnergy/pattern5.js";
 
-import selfdrivingcarsPattern1 from "../conversation/SelfDrivingCarts/pattern1.js";
-import selfdrivingcarsPattern2 from "../conversation/SelfDrivingCarts/pattern2.js";
-import selfdrivingcarsPattern3 from "../conversation/SelfDrivingCarts/pattern3.js";
-import selfdrivingcarsPattern4 from "../conversation/SelfDrivingCarts/pattern4.js";
-import selfdrivingcarsPattern5 from "../conversation/SelfDrivingCarts/pattern5.js";
+import selfdrivingcarsPattern1 from "../conversation/SelfDrivingCars/pattern1.js";
+import selfdrivingcarsPattern2 from "../conversation/SelfDrivingCars/pattern2.js";
+import selfdrivingcarsPattern3 from "../conversation/SelfDrivingCars/pattern3.js";
+import selfdrivingcarsPattern4 from "../conversation/SelfDrivingCars/pattern4.js";
+import selfdrivingcarsPattern5 from "../conversation/SelfDrivingCars/pattern5.js";
 
 import underagesnsPattern1 from "../conversation/underagesns/pattern1.js";
 import underagesnsPattern2 from "../conversation/underagesns/pattern2.js";
