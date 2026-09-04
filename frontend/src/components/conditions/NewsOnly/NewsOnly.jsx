@@ -1,6 +1,6 @@
-import aiCopyright from "./aiCopyright.html?raw";
 import aiinschool from "./aiinschool.html?raw";
-import immigration from "./immigration.html?raw";
+import nuclearenergy from "./nuclearenergy.html?raw";
+import selfdrivingcars from "./selfdrivingcars.html?raw";
 import underagesns from "./underagesns.html?raw";
 
 import PageNavigation from "../../PageNavigation/PageNavigation";
@@ -8,9 +8,9 @@ import PageNavigation from "../../PageNavigation/PageNavigation";
 // import "./NewsOnly.css";
 
 const articles = {
-  aiCopyright,
   aiinschool,
-  immigration,
+  nuclearenergy,
+  selfdrivingcars,
   underagesns,
 };
 
