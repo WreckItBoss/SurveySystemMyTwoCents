@@ -1,6 +1,6 @@
 import aiinschool from "../newsarticle/aiinschool.html?raw";
 import nuclearenergy from "../newsarticle/nuclearenergy.html?raw";
-import selfdrivingcars from "../newsarticle/selfdrivingcars.html?raw";
+import selfdrivingcars from "../newsarticle/SelfDrivingCars.html?raw";
 import underagesns from "../newsarticle/underagesns.html?raw";
 
 import aiinschoolPattern1 from "../conversation/aiinschool/pattern1.js";
@@ -9,17 +9,17 @@ import aiinschoolPattern3 from "../conversation/aiinschool/pattern3.js";
 import aiinschoolPattern4 from "../conversation/aiinschool/pattern4.js";
 import aiinschoolPattern5 from "../conversation/aiinschool/pattern5.js";
 
-import nuclearenergyPattern1 from "../conversation/nuclearenergy/pattern1.js";
-import nuclearenergyPattern2 from "../conversation/nuclearenergy/pattern2.js";
-import nuclearenergyPattern3 from "../conversation/nuclearenergy/pattern3.js";
-import nuclearenergyPattern4 from "../conversation/nuclearenergy/pattern4.js";
-import nuclearenergyPattern5 from "../conversation/nuclearenergy/pattern5.js";
+import nuclearenergyPattern1 from "../conversation/NuclearEnergy/pattern1.js";
+import nuclearenergyPattern2 from "../conversation/NuclearEnergy/pattern2.js";
+import nuclearenergyPattern3 from "../conversation/NuclearEnergy/pattern3.js";
+import nuclearenergyPattern4 from "../conversation/NuclearEnergy/pattern4.js";
+import nuclearenergyPattern5 from "../conversation/NuclearEnergy/pattern5.js";
 
-import selfdrivingcarsPattern1 from "../conversation/selfdrivingcars/pattern1.js";
-import selfdrivingcarsPattern2 from "../conversation/selfdrivingcars/pattern2.js";
-import selfdrivingcarsPattern3 from "../conversation/selfdrivingcars/pattern3.js";
-import selfdrivingcarsPattern4 from "../conversation/selfdrivingcars/pattern4.js";
-import selfdrivingcarsPattern5 from "../conversation/selfdrivingcars/pattern5.js";
+import selfdrivingcarsPattern1 from "../conversation/SelfDrivingCarts/pattern1.js";
+import selfdrivingcarsPattern2 from "../conversation/SelfDrivingCarts/pattern2.js";
+import selfdrivingcarsPattern3 from "../conversation/SelfDrivingCarts/pattern3.js";
+import selfdrivingcarsPattern4 from "../conversation/SelfDrivingCarts/pattern4.js";
+import selfdrivingcarsPattern5 from "../conversation/SelfDrivingCarts/pattern5.js";
 
 import underagesnsPattern1 from "../conversation/underagesns/pattern1.js";
 import underagesnsPattern2 from "../conversation/underagesns/pattern2.js";
